@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Font.css">
+    <link rel="stylesheet" href="index.css">
+    <title>CyFuse</title>
+</head>
+<body>
+    <div class="header">
+        <div class="cyfuse-with-logo">
+            <img src="Assets/CyFuseLogo.png" alt="CyFuse Logo">
+            <h1>CyFuse</h1>
+        </div>
+        <div class="navbar">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">Projects</a></li>
+                <li><a href="services.html">Team</a></li>
+                <li><a href="contact.html">About Us</a></li>
+            </ul>
+        </div>
+        <div class="hamburger">
+            <div class="back-icon">
+            <div class="bar1 bar"></div>
+            <div class="bar2 bar"></div>
+            <div class="bar3 bar"></div>
+        </div>
+        
+        </div>
+    </div>
+    <div class="hero-section">
+        <h1>CyFuse</h1>
+    </div>
+    <div class="bg-video">
+        <video autoplay muted loop>
+            <source src="Assets/allLow1.m4v" type="video/mp4">
+        </video>
+    </div>
+</body>
+
+<script>
+    const hamburger = document.querySelector('.hamburger');
+    const navbar = document.querySelector('.navbar');
+
+    hamburger.addEventListener('click', () => {
+        navbar.classList.toggle('active');
+        hamburger.classList.toggle('active');
+        hamburger.appendChild(navbar);
+        Header.removeChild(navbar);
+    });
+</script>
+</html>

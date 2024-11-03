@@ -1,0 +1,130 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: 'Poppins';
+    background: #000;
+    color: #fff;
+}
+
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 15vh;
+}
+
+.header .cyfuse-with-logo{
+    display: flex;
+    align-items: center;
+    margin-left: 4vw;
+    font-size: 1em;
+    letter-spacing:2.5px;
+}
+.header .cyfuse-with-logo img{
+    width: 1.5em;
+    margin-left: 1vw;
+    margin-right: 0.5em;
+}
+.navbar{
+    margin-right: 7vw;
+}
+
+.hamburger{
+    display: none;
+}
+.header .navbar ul{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+}
+
+.header .navbar ul li a{
+    text-decoration: none;
+    color: #fff;
+    margin-left: 1vw;
+    margin-right: 1.5vw;
+}
+
+.hero-section{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 85vh;
+}
+
+.bg-video{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+}
+
+.bg-video video{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+@media (max-width: 768px) {
+    .hamburger {
+        display: flex;
+        cursor: pointer;
+        margin-right: 4vw;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: flex-end;
+    }
+
+    .hamburger .bar ,.navbar{
+        width: 25px;
+        height: 3px;
+        background-color: #fff;
+        margin: 5px 0;
+        transition: 0.4s;
+    }
+
+
+    .navbar {
+        display: none;
+        flex-direction: column;
+        width: 20vw;
+        text-align: center;
+    }
+    .navbar ul {
+        /* margin-top: 5vw; */
+        flex-direction: column;
+        width: 20vw;
+        text-align: center;
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        position: relative;
+        /* transition: 0.4s; */
+
+    }
+
+    .navbar.active {
+        display: flex;
+    }
+
+    .hamburger.active .bar1 {
+        transform: rotate(-45deg) translate(-5px, 6px);
+    }
+
+    .hamburger.active .bar2 {
+        opacity: 0;
+    }
+
+    .hamburger.active .bar3 {
+        transform: rotate(45deg) translate(-5px, -6px);
+    }
+}
