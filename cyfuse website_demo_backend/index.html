@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Sign-In with Firebase</title>
+
+  <!-- Add Firebase SDK (Modular version for Firebase 9+) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOJBqKGPBdx6ZokTHJwJ8YIqYZTjE6skQ",
+      authDomain: "cyfuse-c906e.firebaseapp.com",
+      projectId: "cyfuse-c906e",
+      storageBucket: "cyfuse-c906e.appspot.com",
+      messagingSenderId: "586599557367",
+      appId: "1:586599557367:web:d96a63d23f22efe4f30bf2",
+      measurementId: "G-RSQVCSEBF9"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Google sign-in button event listener
+    document.getElementById("google-sign-in-btn").addEventListener("click", () => {
+      const provider = new GoogleAuthProvider();
+
+      // Start Google sign-in flow
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          console.log("Signed in as:", user.displayName);
+          
+          // Store user data in localStorage
+          localStorage.setItem("user", JSON.stringify(user));
+
+          // If sign-in is successful, redirect to the next page
+          window.location.href = "nextpage.html";  // Redirect to the next page
+        })
+        .catch((error) => {
+          console.error("Error signing in: ", error.message);
+        });
+    });
+  </script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+    }
+    .btn {
+      background-color: #4285F4;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #357ae8;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Google Sign-In</h1>
+  <button class="btn" id="google-sign-in-btn">Sign In with Google</button>
+
+</body>
+</html>
+
