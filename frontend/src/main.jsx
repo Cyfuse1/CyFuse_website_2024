@@ -5,6 +5,7 @@ import About from './components/About.jsx';
 import Home from './components/Home.jsx';
 import Projects from './components/Projects.jsx';
 import Team from './components/Team.jsx';
+import Event from './components/Event.jsx';
 import './index.css';
 import WebLayout from './WebLayout.jsx';
 const router = createBrowserRouter([
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
       {
         path: 'team',
         element: <Team />
+      },
+      {
+        path: 'events',
+        element: <Event />
       }
     ]
   }

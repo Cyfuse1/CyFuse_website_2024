@@ -31,6 +31,12 @@ function Header() {
               Home
             </Link>
           </li>
+
+          <li className="py-2 md:py-0">
+            <Link to="/events" className="text-white mx-2 text-base md:text-lg">
+              Events
+            </Link>
+          </li>
           <li className="py-2 md:py-0">
             <Link
               to="/projects"
@@ -39,6 +45,7 @@ function Header() {
               Projects
             </Link>
           </li>
+
           <li className="py-2 md:py-0">
             <Link to="/team" className="text-white mx-2 text-base md:text-lg">
               Team

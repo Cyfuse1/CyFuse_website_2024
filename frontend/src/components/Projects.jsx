@@ -1,4 +1,6 @@
+import { Chip } from '@nextui-org/react';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const projectData = [
   { 
@@ -17,9 +19,14 @@ const projectData = [
     title: 'LiFi Communication', 
     description: 'Exploring the fusion of LiFi technology with UAVs, this project aims to enhance communication and data transmission capabilities. Participants will experiment with networking protocols, hardware integration, and novel applications for this integrated system.' 
   },
+  // Add more projects as needed
 ];
 
 function Projects() {
+  const navigate = useNavigate();
+
+ 
+
   return (
     <div className="relative bg-black text-white font-sans min-h-screen py-8 px-6 md:px-16">
       {/* Blurred Background */}
@@ -27,8 +34,23 @@ function Projects() {
 
       {/* Page Heading */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-6xl font-bold">Projects</h1>
-        <h2 className="text-lg md:text-2xl mt-4">Take a look at our projects</h2>
+        <h1 className="text-1xl md:text-1xl font-bold">Projects</h1>
+        <h2 className="text-lg md:text-7xl mt-4">Take a look at our projects</h2>
+      </div>
+
+      {/* Project Chips */}
+      <div className="flex flex-wrap gap-4 justify-center mb-12">
+        {projectData.map((project, index) => (
+          <Chip
+            key={index}
+            color="warning"
+            variant="bordered"
+
+            className="cursor-pointer border-white text-white"
+          >
+            {project.title}
+          </Chip>
+        ))}
       </div>
 
       {/* Projects Grid */}
@@ -36,15 +58,13 @@ function Projects() {
         {projectData.map((project, index) => (
           <div
             key={index}
-            className="relative flex flex-col justify-start items-start w-full h-auto p-6 md:p-8 text-sm md:text-lg bg-gradient-to-br from-white/10 to-white/30 shadow-lg backdrop-blur-[15%] rounded-2xl"
+            className="relative flex flex-col justify-center items-center w-full h-full aspect-square p-6 md:p-16 text-sm md:text-lg bg-gradient-to-br from-white/10 to-white/30 shadow-lg backdrop-blur-md rounded-2xl"
           >
-            {/* Overlay Decoration */}
-            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-black opacity-50 rounded-2xl pointer-events-none"></div>
-
-            {/* Project Content */}
-            <span className="text-gray-300 text-xs uppercase tracking-widest mb-2">In Progress</span>
-            <h3 className="text-2xl font-bold mb-4">{project.title}</h3>
-            <p className="text-sm leading-relaxed text-gray-400">{project.description}</p>
+            {/* Content */}
+            <div className="relative z-10 text-center">
+              <h3 className="text-2xl font-bold mb-4">{project.title}</h3>
+              <p>{project.description}</p>
+            </div>
           </div>
         ))}
       </div>
