@@ -9,9 +9,10 @@
 ## Run the Code
 
 1. Navigate to the directory containing the project.
-2. Start the server using `http-server` (a Node.js server).
-3. Open the browser and go to the URL: `http://127.0.0.1:8080`.
-4. Ensure that Node.js is installed. If not, install it from [Node.js Official Website](https://nodejs.org).
+2. Install http-server using `npm install -g http-server`.
+3. Start the server using `http-server` (a Node.js server).
+4. Open the browser and go to the URL: `http://127.0.0.1:8080` or `http:localhost:8080`.
+5. Ensure that Node.js is installed. If not, install it from [Node.js Official Website](https://nodejs.org).
 
 ## Database Tables
 
