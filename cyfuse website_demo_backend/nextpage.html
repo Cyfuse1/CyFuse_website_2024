@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload Data to Firestore</title>
+  <title>Perform Actions on Firestore</title>
 
   <!-- Add Firebase SDK (Modular version for Firebase 9+) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, getDocs, doc } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
 
     // Firebase configuration
     const firebaseConfig = {
@@ -27,45 +27,51 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Get the action from the query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get("action");
+
     // Get user info from localStorage
     const user = JSON.parse(localStorage.getItem("user"));
-    
-    if (user) {
-      console.log("User found:", user.displayName);
-      
-      // JSON Data to Upload (example)
-      const jsonData = [
-        { id: 1, title: "title1", description: "Just a text" },
-        { id: 2, title: "title2", description: "Just a text" }
-      ];
 
-      // Function to upload JSON data to Firestore
-      async function uploadJsonToFirestore(collectionName, jsonData) {
-        const collectionRef = collection(db, collectionName);
+    // Function to handle Firestore actions
+    async function performAction() {
+      const collectionName = "Announcements";
+      const collectionRef = collection(db, collectionName);
 
-        try {
-          for (const item of jsonData) {
-            await addDoc(collectionRef, item); // Add each JSON object as a document
-            console.log(`Document added with ID: ${item.id}`);
-          }
-          console.log("All documents successfully uploaded!");
-          alert("Documents uploaded successfully!");
-        } catch (error) {
-          console.error("Error adding document: ", error);
+      try {
+        if (action === "create" && user) {
+          const newDoc = { title: "New Record", description: "This is a new record." };
+          await addDoc(collectionRef, newDoc);
+          alert("Record created successfully!");
+        } else if (action === "update" && user) {
+          const docRef = doc(db, collectionName, "3Wav0ZR9Kzf7FuaWCl8v"); // Replace with an actual document ID
+          await updateDoc(docRef, { title: "Updated Record" });
+          alert("Record updated successfully!");
+        } else if (action === "delete" && user) {
+          const docRef = doc(db, collectionName, "3Wav0ZR9Kzf7FuaWCl8v"); // Replace with an actual document ID
+          await deleteDoc(docRef);
+          alert("Record deleted successfully!");
+        } else if (action === "fetch") {
+          const querySnapshot = await getDocs(collectionRef);
+          querySnapshot.forEach((doc) => {
+            console.log(doc.id, " => ", doc.data());
+          });
+          alert("Fetched records. Check the console.");
+        } else {
+          alert("Action not allowed or user not authenticated.");
         }
+      } catch (error) {
+        console.error("Error performing action: ", error);
       }
-
-      // Upload JSON data to Firestore
-      uploadJsonToFirestore("Announcements", jsonData);
-    } else {
-      console.error("No user found. Please sign in.");
-      alert("Please sign in first.");
     }
+
+    // Perform the action after loading
+    document.addEventListener("DOMContentLoaded", () => performAction());
   </script>
 </head>
 <body>
-  <h1>Uploading Data to Firestore</h1>
-  <p>Uploading documents...</p>
+  <h1>Performing Action: <span id="action"></span></h1>
 </body>
 </html>
 

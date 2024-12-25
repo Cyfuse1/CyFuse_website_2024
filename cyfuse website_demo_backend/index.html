@@ -25,25 +25,35 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Google sign-in button event listener
-    document.getElementById("google-sign-in-btn").addEventListener("click", () => {
+    // Function to handle authentication
+    function authenticate(action) {
       const provider = new GoogleAuthProvider();
 
-      // Start Google sign-in flow
       signInWithPopup(auth, provider)
         .then((result) => {
           const user = result.user;
           console.log("Signed in as:", user.displayName);
-          
+
           // Store user data in localStorage
           localStorage.setItem("user", JSON.stringify(user));
 
-          // If sign-in is successful, redirect to the next page
-          window.location.href = "nextpage.html";  // Redirect to the next page
+          // Redirect to the next page with the action
+          window.location.href = `nextpage.html?action=${action}`;
         })
         .catch((error) => {
           console.error("Error signing in: ", error.message);
         });
+    }
+
+    // Event listeners for buttons
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("create-btn").addEventListener("click", () => authenticate("create"));
+      document.getElementById("update-btn").addEventListener("click", () => authenticate("update"));
+      document.getElementById("delete-btn").addEventListener("click", () => authenticate("delete"));
+      document.getElementById("fetch-btn").addEventListener("click", () => {
+        // No authentication required for fetching records
+        window.location.href = "nextpage.html?action=fetch";
+      });
     });
   </script>
   
@@ -60,6 +70,7 @@
       font-size: 16px;
       border: none;
       cursor: pointer;
+      margin: 10px;
     }
     .btn:hover {
       background-color: #357ae8;
@@ -69,7 +80,10 @@
 <body>
 
   <h1>Google Sign-In</h1>
-  <button class="btn" id="google-sign-in-btn">Sign In with Google</button>
+  <button class="btn" id="create-btn">Create Record</button>
+  <button class="btn" id="update-btn">Update Record</button>
+  <button class="btn" id="delete-btn">Delete Record</button>
+  <button class="btn" id="fetch-btn">Fetch Records</button>
 
 </body>
 </html>
