@@ -1,9 +1,9 @@
 import React from 'react';
 import { useInView } from 'react-intersection-observer';
 import AboutBg from '../Assets/about-bg.png';
-import InnovationVideo from '../Assets/allLow1.m4v';
 import EventsHomeBg from '../Assets/events-home-bg.png';
 import ProjectHomeBg from '../Assets/project-home-bg.png';
+import InnovationVideo from './final.mp4';
 
 function Home() {
   const [heroRef, heroInView] = useInView({ triggerOnce: false, threshold: 0.2 });

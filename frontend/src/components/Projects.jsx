@@ -1,31 +1,34 @@
 import { Chip } from '@nextui-org/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
-
-const projectData = [
-  {
-    title: 'Space Debris',
-    description:
-      'This project amalgamates nuclear physics and AI to identify and eliminate hazardous space debris. In-depth research focuses on devising AI-driven algorithms capable of detecting and tracking debris, coupled with developing innovative strategies for removal.',
-  },
-  {
-    title: 'Automated Attendance',
-    description:
-      'Leveraging computer vision and machine learning, this project aims to revolutionize attendance tracking across varied settings. Participants will delve into image processing, data analytics, and algorithm development to streamline attendance processes efficiently.',
-  },
-  {
-    title: 'Robotic Arm',
-    description:
-      'Harnessing computer vision and gesture control, this project focuses on innovating robotic arms capable of intricate and complex tasks. Participants will design, test, and refine gesture-controlled robotic arms, revolutionizing industries requiring precision and versatility.',
-  },
-  {
-    title: 'LiFi Communication',
-    description:
-      'Exploring the fusion of LiFi technology with UAVs, this project aims to enhance communication and data transmission capabilities. Participants will experiment with networking protocols, hardware integration, and novel applications for this integrated system.',
-  },
-];
+import { fetchCollectionData } from './script'; // Import Firestore fetching function
 
 function Projects() {
+  const [projects, setProjects] = useState([]); // State to store project data
+  const [loading, setLoading] = useState(true); // State to manage loading
+  const [error, setError] = useState(null); // State to manage errors
+
+  // Fetch data from Firestore
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await fetchCollectionData('projects'); // Fetch 'projects' collection
+        console.log('Fetched Projects Data:', data); // Log data to console
+        setProjects(data); // Store fetched data
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        setError('Failed to load projects.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  if (loading) return <p className="text-center text-white">Loading projects...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
+
   return (
     <div className="relative bg-black text-white font-sans min-h-screen py-8 px-6 md:px-16">
       {/* Blurred Background */}
@@ -43,21 +46,21 @@ function Projects() {
 
       {/* Project Chips */}
       <div className="flex flex-wrap gap-4 justify-center mb-12">
-        {projectData.map((project, index) => (
+        {projects.map((project, index) => (
           <Chip
             key={index}
             color="warning"
             variant="bordered"
             className="cursor-pointer border-white text-white hover:bg-white/10 transition-all duration-300 hover:scale-110"
           >
-            {project.title}
+            {project.Title} {/* Use Firestore Title field */}
           </Chip>
         ))}
       </div>
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mx-auto max-w-5xl">
-        {projectData.map((project, index) => {
+        {projects.map((project, index) => {
           const [ref, inView] = useInView({
             threshold: 0.2, // Trigger animation when 20% of the card is visible
             triggerOnce: false, // Animate only once per card
@@ -73,8 +76,21 @@ function Projects() {
             >
               {/* Content */}
               <div className="relative z-10 text-center">
-                <h3 className="text-2xl font-bold mb-4">{project.title}</h3>
-                <p>{project.description}</p>
+                <h3 className="text-2xl font-bold mb-4">{project.Title}</h3>
+                <p className="mb-4">{project.Description}</p>
+                <p className="text-sm text-gray-400">
+                  Status: {project.Status}
+                </p>
+                <p className="text-sm text-gray-400">
+                  Members: {project['Members working'].join(', ')}
+                </p>
+                {project.Picture && (
+                  <img
+                    src={project.Picture}
+                    alt={`${project.Title} illustration`}
+                    className="mt-4 w-full rounded-md"
+                  />
+                )}
               </div>
             </div>
           );
