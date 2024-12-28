@@ -1,7 +1,8 @@
+
 import { Chip } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { fetchCollectionData } from './script'; // Import Firestore fetching function
+import { fetchCollectionData } from './script'; // Import the fetchCollectionData function
 
 function Projects() {
   const [projects, setProjects] = useState([]); // State to store project data

@@ -1,40 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-
-const teamData = {
-  coordinators: [
-    { name: "Coordinator 1", photo: "coordinator1.jpg" },
-    { name: "Coordinator 2", photo: "coordinator2.jpg" },
-    { name: "Coordinator 3", photo: "coordinator3.jpg" },
-    { name: "Coordinator 4", photo: "coordinator4.jpg" },
-  ],
-  leads: [
-    { name: "Lead 1", photo: "lead1.jpg" },
-    { name: "Lead 2", photo: "lead2.jpg" },
-    { name: "Lead 3", photo: "lead3.jpg" },
-    { name: "Lead 4", photo: "lead4.jpg" },
-  ],
-  creativeTeam: [
-    { name: "Creative 1", photo: "creative1.jpg" },
-    { name: "Creative 2", photo: "creative2.jpg" },
-    { name: "Creative 3", photo: "creative3.jpg" },
-    { name: "Creative 4", photo: "creative4.jpg" },
-  ],
-  webDevTeam: [
-    { name: "Web Dev 1", photo: "webdev1.jpg" },
-    { name: "Web Dev 2", photo: "webdev2.jpg" },
-    { name: "Web Dev 3", photo: "webdev3.jpg" },
-    { name: "Web Dev 4", photo: "webdev4.jpg" },
-  ],
-  operationsTeam: [
-    { name: "Operations 1", photo: "operations1.jpg" },
-    { name: "Operations 2", photo: "operations2.jpg" },
-    { name: "Operations 3", photo: "operations3.jpg" },
-    { name: "Operations 4", photo: "operations4.jpg" },
-  ],
-};
+import { fetchCollectionData } from "./script"; // Assuming Firebase functions are in a separate file
 
 function Team() {
+  const [teamData, setTeamData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Fetch team data from Firestore
+    fetchCollectionData("Teams")
+      .then((data) => {
+        const structuredData = data.reduce((acc, member) => {
+          acc[member.team] = acc[member.team] || [];
+          acc[member.team].push({ name: member.name, photo: member.photo });
+          return acc;
+        }, {});
+        setTeamData(structuredData);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching team data:", err);
+        setError("Failed to fetch team data.");
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div className="text-white text-center">Loading...</div>;
+  if (error) return <div className="text-red-500 text-center">{error}</div>;
+
   return (
     <div className="bg-black text-white font-sans min-h-screen">
       {/* Heading */}
@@ -62,7 +56,9 @@ const TeamSection = ({ section, members }) => {
   return (
     <div
       ref={ref}
-      className={`px-8 md:px-16 py-12 ${inView ? "animate-fade-in opacity-100" : "opacity-0 translate-y-8"}`}
+      className={`px-8 md:px-16 py-12 ${
+        inView ? "animate-fade-in opacity-100" : "opacity-0 translate-y-8"
+      }`}
     >
       {/* Section Heading */}
       <h2 className="text-2xl font-semibold border-b border-white pb-2 mb-6 capitalize">

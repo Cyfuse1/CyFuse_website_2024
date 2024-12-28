@@ -1,32 +1,29 @@
 import { Chip } from '@nextui-org/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useNavigate } from 'react-router-dom';
-
-const currentEvents = [
-  {
-    title: 'Tech Conference 2023',
-    description: 'Join us for the annual Tech Conference where industry leaders discuss the latest trends in technology.',
-  },
-  {
-    title: 'AI Workshop',
-    description: 'A hands-on workshop on Artificial Intelligence and Machine Learning, led by experts in the field.',
-  },
-];
-
-const pastEvents = [
-  {
-    title: 'Hackathon 2022',
-    description: 'A 48-hour hackathon where participants developed innovative solutions to real-world problems.',
-  },
-  {
-    title: 'Robotics Expo',
-    description: 'An exhibition showcasing the latest advancements in robotics and automation.',
-  },
-];
+import { fetchCollectionData } from './script'; // Ensure this path is correct
 
 function Event() {
   const navigate = useNavigate();
+  const [currentEvents, setCurrentEvents] = useState([]);
+  const [pastEvents, setPastEvents] = useState([]);
+
+  useEffect(() => {
+    // Fetch current and past events from Firestore
+    const fetchEvents = async () => {
+      try {
+        const current = await fetchCollectionData('CurrentEvents');
+        const past = await fetchCollectionData('PastEvents');
+        setCurrentEvents(current);
+        setPastEvents(past);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   const handleChipClick = (sectionId) => {
     const sectionElement = document.getElementById(sectionId);
@@ -37,8 +34,8 @@ function Event() {
 
   const renderEventCard = (event, index) => {
     const [ref, inView] = useInView({
-      threshold: 0.2, // Trigger when 20% of the card is visible
-      triggerOnce: false, // Animate only once
+      threshold: 0.2,
+      triggerOnce: false,
     });
 
     return (
@@ -51,14 +48,18 @@ function Event() {
       >
         <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
           <img
-            src={event.image || 'https://via.placeholder.com/150'}
-            alt={event.title}
+            src={event.Picture || 'https://via.placeholder.com/150'}
+            alt={event.Title}
             className="w-full md:w-48 h-auto rounded-xl object-cover"
           />
         </div>
         <div className="flex-1">
-          <h3 className="text-2xl font-bold mb-4">{event.title}</h3>
-          <p className="text-gray-300">{event.description}</p>
+          <h3 className="text-2xl font-bold mb-4">{event.Title}</h3>
+          <p className="text-gray-300 mb-2"><strong>Description:</strong> {event.Description}</p>
+          <p className="text-gray-300 mb-2"><strong>Venue:</strong> {event.Venue}</p>
+          <p className="text-gray-300 mb-2"><strong>Time:</strong> {new Date(event.Time).toLocaleString()}</p>
+          <p className="text-gray-300 mb-2"><strong>Status:</strong> {event.Status}</p>
+          <p className="text-gray-300"><strong>Registration:</strong> {event['Registration details']}</p>
         </div>
       </div>
     );
@@ -99,22 +100,11 @@ function Event() {
       <div id="current-events" className="mb-12">
         <div className="ml-[7%]">
           <h2 className="text-2xl md:text-4xl font-bold mb-6">Current Events</h2>
-          <div className="flex flex-wrap gap-4">
-            {currentEvents.map((event, index) => (
-              <Chip
-                key={index}
-                color="warning"
-                variant="bordered"
-                onClick={() => handleChipClick(event.title)}
-                className="cursor-pointer border-white text-white hover:scale-110"
-              >
-                {event.title}
-              </Chip>
-            ))}
-          </div>
         </div>
         <div className="mt-6">
-          {currentEvents.map(renderEventCard)}
+          {currentEvents.length > 0
+            ? currentEvents.map(renderEventCard)
+            : <p className="text-gray-400">No current events available.</p>}
         </div>
       </div>
 
@@ -122,22 +112,11 @@ function Event() {
       <div id="past-events" className="mb-12">
         <div className="ml-[7%]">
           <h2 className="text-2xl md:text-4xl font-bold mb-6">Past Events</h2>
-          <div className="flex flex-wrap gap-4">
-            {pastEvents.map((event, index) => (
-              <Chip
-                key={index}
-                color="warning"
-                variant="bordered"
-                onClick={() => handleChipClick(event.title)}
-                className="cursor-pointer border-white text-white hover:scale-110"
-              >
-                {event.title}
-              </Chip>
-            ))}
-          </div>
         </div>
         <div className="mt-6">
-          {pastEvents.map(renderEventCard)}
+          {pastEvents.length > 0
+            ? pastEvents.map(renderEventCard)
+            : <p className="text-gray-400">No past events available.</p>}
         </div>
       </div>
     </div>
