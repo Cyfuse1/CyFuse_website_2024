@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { fetchCollectionData } from "./script"; // Assuming Firebase functions are in a separate file
+import { fetchDataFromCollection } from './script'; // Import the fetchDataFromCollection function
 
 function Team() {
   const [teamData, setTeamData] = useState({});
@@ -8,23 +8,24 @@ function Team() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch team data from Firestore
-    fetchCollectionData("Teams")
-      .then((data) => {
-        const structuredData = data.reduce((acc, member) => {
-          acc[member.team] = acc[member.team] || [];
-          acc[member.team].push({ name: member.name, photo: member.photo });
-          return acc;
-        }, {});
-        setTeamData(structuredData);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching team data:", err);
-        setError("Failed to fetch team data.");
-        setLoading(false);
-      });
-  }, []);
+  // Fetch team data from Firestore
+  fetchDataFromCollection("team_details")
+    .then((data) => {
+      const structuredData = data.reduce((acc, member) => {
+        acc[member.team] = acc[member.team] || [];
+        acc[member.team].push({ name: member.name, photo: member.photo });
+        return acc;
+      }, {});
+      setTeamData(structuredData);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.error("Error fetching team data:", err);
+      setError("Failed to fetch team data.");
+      setLoading(false);
+    });
+}, []);
+
 
   if (loading) return <div className="text-white text-center">Loading...</div>;
   if (error) return <div className="text-red-500 text-center">{error}</div>;

@@ -2,21 +2,35 @@ import { Chip } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useNavigate } from 'react-router-dom';
-import { fetchCollectionData } from './script'; // Ensure this path is correct
+import { fetchDataFromCollection } from './script'; // Import the fetchDataFromCollection function
 
 function Event() {
   const navigate = useNavigate();
-  const [currentEvents, setCurrentEvents] = useState([]);
-  const [pastEvents, setPastEvents] = useState([]);
+  const [inProgressEvents, setInProgressEvents] = useState([]);
+  const [completedEvents, setCompletedEvents] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
 
   useEffect(() => {
-    // Fetch current and past events from Firestore
     const fetchEvents = async () => {
       try {
-        const current = await fetchCollectionData('CurrentEvents');
-        const past = await fetchCollectionData('PastEvents');
-        setCurrentEvents(current);
-        setPastEvents(past);
+        console.log('Fetching events...'); // Log when fetch starts
+        const events = await fetchDataFromCollection('AllEvents'); // Fetch all events from Firestore
+        console.log('Fetched Events Data:', events); // Log the fetched data
+
+        if (!Array.isArray(events)) {
+          console.log('Type of events:', typeof events); // Log the type to check if it's an array
+          return;
+        }
+
+        // Filter events based on their status
+        const inProgress = events.filter(event => event.Status === 'In progress');
+        const completed = events.filter(event => event.Status === 'Completed');
+        const upcoming = events.filter(event => event.Status === 'Upcoming');
+
+        // Set state for the respective event categories
+        setInProgressEvents(inProgress);
+        setCompletedEvents(completed);
+        setUpcomingEvents(upcoming);
       } catch (error) {
         console.error('Error fetching events:', error);
       }
@@ -76,47 +90,61 @@ function Event() {
         <h2 className="text-lg md:text-2xl mt-4 animate-slide-down">Explore our events</h2>
       </div>
 
-      {/* Chips to Redirect to Current and Past Events */}
+      {/* Chips for navigation */}
       <div className="flex justify-center gap-4 mb-8">
         <Chip
           color="warning"
           variant="bordered"
-          onClick={() => handleChipClick('current-events')}
+          onClick={() => handleChipClick('in-progress-events')}
           className="cursor-pointer border-white text-white hover:scale-110"
         >
-          Current Events
+          In Progress
         </Chip>
         <Chip
           color="warning"
           variant="bordered"
-          onClick={() => handleChipClick('past-events')}
+          onClick={() => handleChipClick('upcoming-events')}
           className="cursor-pointer border-white text-white hover:scale-110"
         >
-          Past Events
+          Upcoming
+        </Chip>
+        <Chip
+          color="warning"
+          variant="bordered"
+          onClick={() => handleChipClick('completed-events')}
+          className="cursor-pointer border-white text-white hover:scale-110"
+        >
+          Completed
         </Chip>
       </div>
 
-      {/* Current Events Section */}
-      <div id="current-events" className="mb-12">
-        <div className="ml-[7%]">
-          <h2 className="text-2xl md:text-4xl font-bold mb-6">Current Events</h2>
-        </div>
-        <div className="mt-6">
-          {currentEvents.length > 0
-            ? currentEvents.map(renderEventCard)
-            : <p className="text-gray-400">No current events available.</p>}
+      {/* In Progress Events Section */}
+      <div id="in-progress-events" className="mb-12">
+        <h2 className="text-2xl md:text-4xl font-bold mb-6">In Progress Events</h2>
+        <div>
+          {inProgressEvents.length > 0
+            ? inProgressEvents.map(renderEventCard)
+            : <p className="text-gray-400">No in-progress events available.</p>}
         </div>
       </div>
 
-      {/* Past Events Section */}
-      <div id="past-events" className="mb-12">
-        <div className="ml-[7%]">
-          <h2 className="text-2xl md:text-4xl font-bold mb-6">Past Events</h2>
+      {/* Upcoming Events Section */}
+      <div id="upcoming-events" className="mb-12">
+        <h2 className="text-2xl md:text-4xl font-bold mb-6">Upcoming Events</h2>
+        <div>
+          {upcomingEvents.length > 0
+            ? upcomingEvents.map(renderEventCard)
+            : <p className="text-gray-400">No upcoming events available.</p>}
         </div>
-        <div className="mt-6">
-          {pastEvents.length > 0
-            ? pastEvents.map(renderEventCard)
-            : <p className="text-gray-400">No past events available.</p>}
+      </div>
+
+      {/* Completed Events Section */}
+      <div id="completed-events" className="mb-12">
+        <h2 className="text-2xl md:text-4xl font-bold mb-6">Completed Events</h2>
+        <div>
+          {completedEvents.length > 0
+            ? completedEvents.map(renderEventCard)
+            : <p className="text-gray-400">No completed events available.</p>}
         </div>
       </div>
     </div>

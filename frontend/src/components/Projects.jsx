@@ -2,7 +2,7 @@
 import { Chip } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { fetchCollectionData } from './script'; // Import the fetchCollectionData function
+import { fetchDataFromCollection } from './script'; // Import the fetchDataFromCollection function
 
 function Projects() {
   const [projects, setProjects] = useState([]); // State to store project data
@@ -13,7 +13,7 @@ function Projects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const data = await fetchCollectionData('projects'); // Fetch 'projects' collection
+        const data = await fetchDataFromCollection('projects'); // Fetch 'projects' collection
         console.log('Fetched Projects Data:', data); // Log data to console
         setProjects(data); // Store fetched data
       } catch (err) {
