@@ -3,7 +3,6 @@ import { useInView } from 'react-intersection-observer';
 import AboutBg from '../Assets/about-bg.png';
 import EventsHomeBg from '../Assets/events-home-bg.png';
 import ProjectHomeBg from '../Assets/project-home-bg.png';
-import InnovationVideo from './final.mp4';
 
 function Home() {
   const [heroRef, heroInView] = useInView({ triggerOnce: false, threshold: 0.2 });
@@ -13,18 +12,17 @@ function Home() {
 
   return (
     <div className="bg-black text-white font-sans h-full overflow-hidden">
-      {/* Video Background */}
-      <video
-        className="absolute top-0 left-0 w-full h-screen object-cover z-[1] animate-fade-in"
-        autoPlay
-        loop
-        muted
-        playsInline
-      >
-        <source src={InnovationVideo} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-
+      {/* YouTube Video Background */}
+      <div className="absolute top-0 left-0 w-full h-screen z-[1]">
+        <iframe
+          width="100%"
+          height="100%"
+          src="https://www.youtube.com/embed/ASSI9TRgQlg?autoplay=1&mute=1&loop=1&playlist=ASSI9TRgQlg&controls=0&modestbranding=1&showinfo=0&rel=0&fs=0"
+          frameBorder="0"
+          allow="autoplay; fullscreen"
+          className="object-cover w-full h-full"
+        ></iframe>
+      </div>
       {/* Hero Section */}
       <div
         ref={heroRef}

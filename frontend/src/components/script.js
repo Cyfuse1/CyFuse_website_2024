@@ -26,6 +26,7 @@ export async function fetchDataFromCollection(collectionName) {
     const snapshot = await getDocs(colRef);
     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     console.log(`All data from ${collectionName}:`, data);
+    return data;
     // Print each document
     
   } catch (error) {
