@@ -1,9 +1,8 @@
 import { Chip } from '@nextui-org/react';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useNavigate } from 'react-router-dom';
-import { fetchDataFromCollection } from './script'; // Import the fetchDataFromCollection function
-
 function Event() {
   const navigate = useNavigate();
   const [inProgressEvents, setInProgressEvents] = useState([]);
@@ -14,11 +13,12 @@ function Event() {
     const fetchEvents = async () => {
       try {
         console.log('Fetching events...'); // Log when fetch starts
-        const events = await fetchDataFromCollection('AllEvents'); // Fetch all events from Firestore
+        const response = await axios.get('http://localhost:1000/api/getData'); // Fetch data from the API endpoint
+        const events = response.data; // Get the data from the response
         console.log('Fetched Events Data:', events); // Log the fetched data
 
         if (!Array.isArray(events)) {
-          console.log('Type of events:', typeof events); // Log the type to check if it's an array
+          console.error('Fetched data is not an array:', events);
           return;
         }
 
