@@ -1,12 +1,10 @@
 import express from 'express';
 import { GetData } from '../controllers/GetData.controllers.js';
-import upload from '../middleware/multer.middleware.js';
 
-const router = express.Router();
+const router = new express.Router();
 
-router.post('/getData' , upload.single('file'), GetData);
-
+router.route('/getData').get(GetData);
 
 //http://localhost:3000/api/getData
 
-export default router
+export default router;

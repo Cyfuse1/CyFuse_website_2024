@@ -2,8 +2,8 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 
-import uploadRouter from '../routes/GetData.routes.js';
 
+import getDataRouter from '../routes/GetData.routes.js';
 const app = express();
 
 
@@ -13,6 +13,7 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Use the upload route
-app.use('/api', uploadRouter);
+
+app.use('/api', getDataRouter);
 
 export default app;
