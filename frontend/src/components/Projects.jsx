@@ -78,20 +78,20 @@ function Projects() {
             {/* Content */}
             <div className="relative z-10 text-center">
               <h3 className="text-2xl font-bold mb-4">{project.Title}</h3>
-              <p className="mb-4">{project.Description}</p>
+              <p className="mb-4 text-sm">{project.Description}</p>
               <p className="text-sm text-gray-400">
                 Status: {project.Status}
               </p>
-              <p className="text-sm text-gray-400">
+              {/* <p className="text-sm text-gray-400">
                 Members: {project['Members working'].join(', ')}
-              </p>
-              {project.Picture && (
+              </p> */}
+              {/* {project.Picture && (
                 <img
                   src={project.Picture}
                   alt={`${project.Title} illustration`}
                   className="mt-4 w-full rounded-md"
                 />
-              )}
+              )} */}
             </div>
           </div>
         ))}

@@ -29,63 +29,63 @@ function Team() {
       .then((data) => {
         if (Array.isArray(data)) {
           // Map data to the corresponding team arrays
-          const categorizedData = data.reduce((acc, member) => {
+            const categorizedData = data.reduce((acc, member) => {
             // Get the team name from the 'team_name' field
             const team = member.team_name.toLowerCase();
             
             // Categorize members based on the team_name field
             switch (team) {
-              case 'events':
-                acc.events.push({
-                  name: member.Name,
-                  photo: member.Picture, // Assuming 'Picture' is the URL
-                  linkedin: member.Linkedin,
-                  quote: member.Quote,
-                });
-                break;
-              case 'pr and content':
-                acc.prAndContent.push({
-                  name: member.Name,
-                  photo: member.Picture,
-                  linkedin: member.Linkedin,
-                  quote: member.Quote,
-                });
-                break;
-              case 'creatives':
-                acc.creatives.push({
-                  name: member.Name,
-                  photo: member.Picture,
-                  linkedin: member.Linkedin,
-                  quote: member.Quote,
-                });
-                break;
-              case 'development':
-                acc.development.push({
-                  name: member.Name,
-                  photo: member.Picture,
-                  linkedin: member.Linkedin,
-                  quote: member.Quote,
-                });
-                break;
               case 'coordinators':
-                acc.coordinators.push({
-                  name: member.Name,
-                  photo: member.Picture,
-                  linkedin: member.Linkedin,
-                  quote: member.Quote,
-                });
-                break;
+              acc.coordinators.push({
+                name: member.Name,
+                photo: member.Picture, // Assuming 'Picture' is the URL
+                linkedin: member.Linkedin,
+                quote: member.Quote,
+              });
+              break;
+              // case 'development':
+              // acc.development.push({
+              //   name: member.Name,
+              //   photo: member.Picture,
+              //   linkedin: member.Linkedin,
+              //   quote: member.Quote,
+              // });
+              // break;
+              // case 'creatives':
+              // acc.creatives.push({
+              //   name: member.Name,
+              //   photo: member.Picture,
+              //   linkedin: member.Linkedin,
+              //   quote: member.Quote,
+              // });
+              // break;
+              // case 'pr and content':
+              // acc.prAndContent.push({
+              //   name: member.Name,
+              //   photo: member.Picture,
+              //   linkedin: member.Linkedin,
+              //   quote: member.Quote,
+              // });
+              // break;
+              // case 'events':
+              // acc.events.push({
+              //   name: member.Name,
+              //   photo: member.Picture,
+              //   linkedin: member.Linkedin,
+              //   quote: member.Quote,
+              // });
+              // break;
               default:
-                break;
+              break;
             }
             return acc;
-          }, {
-            events: [],
-            prAndContent: [],
-            creatives: [],
-            development: [],
+            }, {
             coordinators: [],
-          });
+            // development: [],
+            // creatives: [],
+            // prAndContent: [],
+            // events: [],
+            });
 
           setTeamData(categorizedData);
         } else {

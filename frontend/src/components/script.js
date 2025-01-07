@@ -24,11 +24,13 @@ export async function fetchDataFromCollection(collectionName) {
   const colRef = collection(db, collectionName);
   try {
     const snapshot = await getDocs(colRef);
-    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    // Order by order_id if present
+    data = data.sort((a, b) => (a.order_id || 0) - (b.order_id || 0));
+    
     console.log(`All data from ${collectionName}:`, data);
     return data;
-    // Print each document
-    
   } catch (error) {
     console.error(`Error fetching data from ${collectionName}:`, error);
   }
