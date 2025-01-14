@@ -29,7 +29,7 @@ export async function fetchDataFromCollection(collectionName) {
     // Order by order_id if present
     data = data.sort((a, b) => (a.order_id || 0) - (b.order_id || 0));
     
-    console.log(`All data from ${collectionName}:`, data);
+    // console.log(`All data from ${collectionName}:`, data);
     return data;
   } catch (error) {
     console.error(`Error fetching data from ${collectionName}:`, error);

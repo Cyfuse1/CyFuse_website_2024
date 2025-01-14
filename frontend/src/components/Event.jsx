@@ -5,7 +5,7 @@ import { fetchDataFromCollection } from './script'; // Import the fetchDataFromC
 async function fetchEventsData() {
   try {
     const data = await fetchDataFromCollection('events'); // Fetch 'events' collection
-    console.log('Fetched Events Data:', data); // Log data to console
+    // console.log('Fetched Events Data:', data); // Log data to console
     return data;
   } catch (err) {
     console.error('Error fetching events:', err);
@@ -14,7 +14,9 @@ async function fetchEventsData() {
 }
 
 function EventCard({ event, index }) {
+  
   return (
+    // console.log(event),
     <div
       key={index}
       className="flex flex-col md:flex-row bg-gradient-to-br backdrop-blur-md rounded-xl p-6 md:p-12 mb-8 mx-4 border border-white transition-transform duration-300
@@ -33,7 +35,7 @@ function EventCard({ event, index }) {
         <p className="text-gray-300 mb-2"><strong>Venue:</strong> {event.Venue}</p>
         <p className="text-gray-300 mb-2"><strong>Time:</strong> {new Date(event.Time).toLocaleString()}</p>
         <p className="text-gray-300 mb-2"><strong>Status:</strong> {event.Status}</p>
-        <p className="text-gray-300"><strong>Registration:</strong> {event['Registration details']}</p>
+        <p className="text-gray-300"><strong>Registration:</strong> {event.Registration}</p>
       </div>
     </div>
   );
@@ -49,6 +51,7 @@ function Event() {
       .then(data => {
         if (Array.isArray(data)) {
           setEvents(data); // Ensure data is an array
+         
         } else {
           throw new Error('Unexpected data format');
         }
@@ -59,6 +62,7 @@ function Event() {
         setLoading(false);
       });
   }, []);
+  // console.log(events);
 
   if (loading) return <p className="text-center text-white">Loading events...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
