@@ -5,7 +5,7 @@ import { fetchDataFromCollection } from './script'; // Import the fetchDataFromC
 async function fetchTeamData() {
   try {
     const data = await fetchDataFromCollection('team_details'); // Fetch 'team' collection
-    console.log('Fetched Team Data:', data); // Log data to console
+    // console.log('Fetched Team Data:', data); // Log data to console
     return data;
   } catch (err) {
     console.error('Error fetching team:', err);
