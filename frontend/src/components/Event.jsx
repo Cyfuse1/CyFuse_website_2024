@@ -1,11 +1,11 @@
 import { Chip } from '@nextui-org/react';
+import { motion, useScroll, useSpring } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { fetchDataFromCollection } from './script'; // Import the fetchDataFromCollection function
 
 async function fetchEventsData() {
   try {
     const data = await fetchDataFromCollection('events'); // Fetch 'events' collection
-    // console.log('Fetched Events Data:', data); // Log data to console
     return data;
   } catch (err) {
     console.error('Error fetching events:', err);
@@ -14,13 +14,15 @@ async function fetchEventsData() {
 }
 
 function EventCard({ event, index }) {
-  
   return (
-    // console.log(event),
-    <div
+    <motion.div
       key={index}
       className="flex flex-col md:flex-row bg-gradient-to-br backdrop-blur-md rounded-xl p-6 md:p-12 mb-8 mx-4 border border-white transition-transform duration-300
         hover:scale-105 hover:brightness-125"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
     >
       <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
         <img
@@ -37,7 +39,7 @@ function EventCard({ event, index }) {
         <p className="text-gray-300 mb-2"><strong>Status:</strong> {event.Status}</p>
         <p className="text-gray-300"><strong>Registration:</strong> {event.Registration}</p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -45,13 +47,14 @@ function Event() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { scrollYProgress } = useScroll(); // Track scroll progress
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
 
   useEffect(() => {
     fetchEventsData()
       .then(data => {
         if (Array.isArray(data)) {
           setEvents(data); // Ensure data is an array
-         
         } else {
           throw new Error('Unexpected data format');
         }
@@ -62,7 +65,6 @@ function Event() {
         setLoading(false);
       });
   }, []);
-  // console.log(events);
 
   if (loading) return <p className="text-center text-white">Loading events...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
@@ -74,6 +76,8 @@ function Event() {
 
   return (
     <div className="relative bg-black text-white font-sans min-h-screen py-8 px-6 md:px-16">
+      <motion.div style={{ scaleX }} className="fixed top-0 left-0 right-0 h-1 bg-blue-500 z-50" />
+
       <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-gray-800 opacity-40 backdrop-blur-lg -z-10"></div>
 
       <div className="text-center mb-12">
@@ -93,26 +97,47 @@ function Event() {
         </Chip>
       </div>
 
-      <div id="in-progress-events" className="mb-12">
+      <motion.div
+        id="in-progress-events"
+        className="mb-12"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
         <h2 className="text-2xl font-bold mb-6">In Progress Events</h2>
         {inProgressEvents.length > 0
           ? inProgressEvents.map((event, index) => <EventCard key={index} event={event} index={index} />)
           : <p className="text-gray-400">No in-progress events available.</p>}
-      </div>
+      </motion.div>
 
-      <div id="upcoming-events" className="mb-12">
+      <motion.div
+        id="upcoming-events"
+        className="mb-12"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
         <h2 className="text-2xl font-bold mb-6">Upcoming Events</h2>
         {upcomingEvents.length > 0
           ? upcomingEvents.map((event, index) => <EventCard key={index} event={event} index={index} />)
           : <p className="text-gray-400">No upcoming events available.</p>}
-      </div>
+      </motion.div>
 
-      <div id="completed-events" className="mb-12">
+      <motion.div
+        id="completed-events"
+        className="mb-12"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
         <h2 className="text-2xl font-bold mb-6">Completed Events</h2>
         {completedEvents.length > 0
           ? completedEvents.map((event, index) => <EventCard key={index} event={event} index={index} />)
           : <p className="text-gray-400">No completed events available.</p>}
-      </div>
+      </motion.div>
     </div>
   );
 }
