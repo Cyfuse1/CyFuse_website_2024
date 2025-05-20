@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useInView } from 'react-intersection-observer';
-import { fetchDataFromCollection } from './script'; // Import the fetchDataFromCollection function
+import { fetchDataFromCollection } from './script';
+import { motion } from 'framer-motion';
 
 async function fetchTeamData() {
   try {
-    const data = await fetchDataFromCollection('team_details'); // Fetch 'team' collection
-    // console.log('Fetched Team Data:', data); // Log data to console
+    const data = await fetchDataFromCollection('team_details');
     return data;
   } catch (err) {
     console.error('Error fetching team:', err);
@@ -28,65 +27,32 @@ function Team() {
     fetchTeamData()
       .then((data) => {
         if (Array.isArray(data)) {
-          // Map data to the corresponding team arrays
-            const categorizedData = data.reduce((acc, member) => {
-            // Get the team name from the 'team_name' field
+          const categorizedData = data.reduce((acc, member) => {
             const team = member.team_name.toLowerCase();
-            
-            // Categorize members based on the team_name field
             switch (team) {
               case 'coordinators':
-              acc.coordinators.push({
-                name: member.Name,
-                photo: member.Picture, // Assuming 'Picture' is the URL
-                linkedin: member.Linkedin,
-                quote: member.Quote,
-              });
-              break;
+                acc.coordinators.push({
+                  name: member.Name,
+                  photo: member.Picture,
+                  linkedin: member.Linkedin,
+                  quote: member.Quote,
+                });
+                break;
+              // Uncomment to include other teams as needed
               // case 'development':
-              // acc.development.push({
-              //   name: member.Name,
-              //   photo: member.Picture,
-              //   linkedin: member.Linkedin,
-              //   quote: member.Quote,
-              // });
-              // break;
-              // case 'creatives':
-              // acc.creatives.push({
-              //   name: member.Name,
-              //   photo: member.Picture,
-              //   linkedin: member.Linkedin,
-              //   quote: member.Quote,
-              // });
-              // break;
-              // case 'pr and content':
-              // acc.prAndContent.push({
-              //   name: member.Name,
-              //   photo: member.Picture,
-              //   linkedin: member.Linkedin,
-              //   quote: member.Quote,
-              // });
-              // break;
-              // case 'events':
-              // acc.events.push({
-              //   name: member.Name,
-              //   photo: member.Picture,
-              //   linkedin: member.Linkedin,
-              //   quote: member.Quote,
-              // });
-              // break;
+              //   acc.development.push({ ... });
+              //   break;
               default:
-              break;
+                break;
             }
             return acc;
-            }, {
+          }, {
             coordinators: [],
             // development: [],
             // creatives: [],
             // prAndContent: [],
             // events: [],
-            });
-
+          });
           setTeamData(categorizedData);
         } else {
           throw new Error('Unexpected data format');
@@ -103,80 +69,121 @@ function Team() {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="bg-black text-white font-sans min-h-screen">
-      {/* Heading */}
-      <div className="text-center py-12">
-        <h1 className="text-8xl font-bold animate-fade-in">Meet the Team</h1>
-        <p className="mt-4 text-lg animate-slide-down">
-          We believe in investing in people and forming meaningful bonds
-        </p>
-      </div>
+    <div className="relative min-h-screen text-white font-sans py-16 px-6 md:px-16 lg:px-24 overflow-hidden">
+      {/* Animated Background */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        style={{ background: 'radial-gradient(circle at 50% 50%, #1e3c72 0%, #0a0a0a 70%)' }}
+        animate={{
+          background: [
+            'radial-gradient(circle at 50% 50%, #1e3c72 0%, #0a0a0a 70%)',
+            'radial-gradient(circle at 70% 30%, #2a5298 0%, #0a0a0a 70%)',
+            'radial-gradient(circle at 30% 60%, #1e3c72 0%, #0a0a0a 70%)',
+          ],
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+      >
+        {/* Particle Overlay */}
+        <motion.div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.1) 1px, transparent 0)`,
+            backgroundSize: '40px 40px',
+          }}
+          animate={{ opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </motion.div>
 
-      {/* Render Each Section Dynamically */}
-      {Object.entries(teamData).map(([section, members]) => (
-        <TeamSection key={section} section={section} members={members} />
-      ))}
+      {/* Header */}
+      <header className="relative z-10 text-center my-24">
+        <motion.h1
+          className="text-5xl md:text-7xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-400"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          Meet the Team
+        </motion.h1>
+        <motion.p
+          className="mt-4 text-lg md:text-2xl text-gray-300"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          We believe in investing in people and forming meaningful bonds
+        </motion.p>
+      </header>
+
+      {/* Team Sections */}
+      <div className="relative z-10">
+        {Object.entries(teamData).map(([section, members]) => (
+          <TeamSection key={section} section={section} members={members} />
+        ))}
+      </div>
     </div>
   );
 }
 
 const TeamSection = ({ section, members }) => {
-  const [ref, inView] = useInView({
-    threshold: 0.2, // Trigger when 20% of the section is visible
-    triggerOnce: false, // Animate only once
-  });
+  const sectionVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
+  };
 
-  // Capitalizing first letter for each section name
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: 'easeOut' } },
+  };
+
   const sectionName = section.replace(/([A-Z])/g, ' $1').toUpperCase();
 
   return (
-    <div
-      ref={ref}
-      className={`px-8 md:px-16 py-12 ${
-        inView ? 'animate-fade-in opacity-100' : 'opacity-0 translate-y-8'
-      }`}
+    <motion.section
+      variants={sectionVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      className="mb-20"
     >
-      {/* Section Heading */}
-      <h2 className="text-2xl font-semibold border-b border-white pb-2 mb-6 capitalize">
+      <h2 className="text-4xl font-bold mb-10 relative text-center group">
         {sectionName}
       </h2>
-
-      {/* Team Members Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {members.map((member, index) => (
-          <div
+          <motion.div
             key={index}
-            className="bg-gray-700 aspect-square flex flex-col items-center justify-center text-center p-4 transition-transform duration-300 hover:scale-105"
+            variants={cardVariants}
+            className="flex flex-col items-center justify-center text-center p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl shadow-lg hover:shadow-xl hover:border-blue-500/30 transition-all duration-300"
           >
-          <img
-  src={member.photo || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXBfhC-QlgM4DmR6VXrznFyXdNwytV9-SOMw&s"}
-  alt={member.name}
-  className="w-20 h-20 rounded-full object-cover mb-4"
-/>
-
-
-            <p className="text-lg font-medium">{member.name}</p>
-
-            {/* Quote */}
+            <img
+              src={member.photo || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXBfhC-QlgM4DmR6VXrznFyXdNwytV9-SOMw&s"}
+              alt={member.name}
+              className="w-24 h-24 rounded-full object-cover mb-4 border border-white/10"
+            />
+            <p className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-400">
+              {member.name}
+            </p>
             {member.quote && (
               <p className="text-sm italic text-gray-400 mt-2">{`"${member.quote}"`}</p>
             )}
-
-            {/* LinkedIn */}
             {member.linkedin && (
               <a
                 href={member.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 mt-2 hover:underline"
+                className="text-blue-400 mt-2 hover:underline"
               >
                 LinkedIn Profile
               </a>
             )}
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.section>
   );
 };
 

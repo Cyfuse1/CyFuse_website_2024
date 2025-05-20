@@ -1,4 +1,3 @@
-import React from 'react';
 import { useInView } from 'react-intersection-observer';
 import AboutBg from '../Assets/about-bg.png';
 import EventsHomeBg from '../Assets/events-home-bg.png';
@@ -13,16 +12,17 @@ function Home() {
   return (
     <div className="bg-black text-white font-sans h-full overflow-hidden">
       {/* YouTube Video Background */}
-      <div className="absolute top-0 left-0 w-full h-screen z-[1]">
-        <iframe
-          width="100%"
-          height="100%"
-          src="https://www.youtube.com/embed/ASSI9TRgQlg?autoplay=1&mute=1&loop=1&playlist=ASSI9TRgQlg&controls=0&modestbranding=1&showinfo=0&rel=0&fs=0"
-          frameBorder="0"
-          allow="autoplay; fullscreen"
-          className="object-cover w-full h-full"
-        ></iframe>
-      </div>
+      <div className="absolute inset-0 z-0 overflow-hidden">
+  <iframe
+    className="absolute inset-0 w-full h-full object-cover pointer-events-none filter brightness-75"
+    src="https://www.youtube.com/embed/ASSI9TRgQlg?autoplay=1&mute=1&loop=1&playlist=ASSI9TRgQlg&controls=0&modestbranding=1&rel=0"
+    
+    allow="autoplay; fullscreen"
+  />
+  {/* Gradient overlay */}
+  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"></div>
+</div>
+
       {/* Hero Section */}
       <div
         ref={heroRef}

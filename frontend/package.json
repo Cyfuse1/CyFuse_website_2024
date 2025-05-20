@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.6.1",
     "@nextui-org/button": "^2.2.3",
     "@nextui-org/chip": "^2.2.3",
     "@nextui-org/react": "^2.6.4",

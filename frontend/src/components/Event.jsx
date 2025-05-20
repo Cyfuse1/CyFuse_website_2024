@@ -1,45 +1,91 @@
-import { Chip } from '@nextui-org/react';
-import React, { useEffect, useState } from 'react';
-import { fetchDataFromCollection } from './script'; // Import the fetchDataFromCollection function
+import { useEffect, useState, Suspense } from 'react';
+import { fetchDataFromCollection } from './script';
+import { motion } from 'framer-motion';
 
-async function fetchEventsData() {
-  try {
-    const data = await fetchDataFromCollection('events'); // Fetch 'events' collection
-    // console.log('Fetched Events Data:', data); // Log data to console
-    return data;
-  } catch (err) {
-    console.error('Error fetching events:', err);
-    throw new Error('Failed to load events.');
-  }
-}
+// Framer Motion variants
+const sectionVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
 
-function EventCard({ event, index }) {
-  
-  return (
-    // console.log(event),
-    <div
-      key={index}
-      className="flex flex-col md:flex-row bg-gradient-to-br backdrop-blur-md rounded-xl p-6 md:p-12 mb-8 mx-4 border border-white transition-transform duration-300
-        hover:scale-105 hover:brightness-125"
-    >
-      <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
-        <img
-          src={event.Picture || 'https://via.placeholder.com/150'}
-          alt={event.Title}
-          className="w-full md:w-48 h-auto rounded-xl object-cover"
-        />
-      </div>
-      <div className="flex-1">
-        <h3 className="text-2xl font-bold mb-4">{event.Title}</h3>
-        <p className="text-gray-300 mb-2"><strong>Description:</strong> {event.Description}</p>
-        <p className="text-gray-300 mb-2"><strong>Venue:</strong> {event.Venue}</p>
-        <p className="text-gray-300 mb-2"><strong>Time:</strong> {new Date(event.Time).toLocaleString()}</p>
-        <p className="text-gray-300 mb-2"><strong>Status:</strong> {event.Status}</p>
-        <p className="text-gray-300"><strong>Registration:</strong> {event.Registration}</p>
-      </div>
+const cardVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: 'easeOut' } },
+};
+
+// Skeleton Loader Component for Events
+const EventSkeleton = () => (
+  <div className="flex flex-col md:flex-row bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 md:p-8 mb-8 mx-4 animate-pulse">
+    <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+      <div className="w-full md:w-48 h-40 rounded-xl bg-gray-700"></div>
     </div>
-  );
-}
+    <div className="flex-1 space-y-3">
+      <div className="h-6 w-3/4 rounded bg-gray-700"></div>
+      <div className="h-4 w-full rounded bg-gray-700"></div>
+      <div className="h-4 w-1/2 rounded bg-gray-700"></div>
+      <div className="h-4 w-2/3 rounded bg-gray-700"></div>
+      <div className="h-4 w-1/3 rounded bg-gray-700"></div>
+    </div>
+  </div>
+);
+
+// Event Listing Component
+const EventList = ({ events }) => (
+  <>
+    {events.length ? (
+      events.map((event, idx) => (
+        <motion.div
+          key={idx}
+          variants={cardVariants}
+          className="flex flex-col md:flex-row bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 md:p-8 mb-8 mx-4 shadow-lg hover:shadow-xl hover:border-purple-500/30 transition-all duration-300 hover:-rotate-1"
+          style={{ marginLeft: idx % 2 === 0 ? '0' : '2rem' }} // Staggered margin for visual flow
+        >
+          <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+            <img
+              src={event.Picture || 'https://via.placeholder.com/150'}
+              alt={event.Title}
+              className="w-full md:w-48 h-auto rounded-xl object-cover border border-white/10"
+            />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-2xl font-semibold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-400">
+              {event.Title}
+            </h3>
+            <p className="text-gray-300 mb-3 text-base leading-relaxed">
+              <strong className="text-white">Description:</strong> {event.Description}
+            </p>
+            <p className="text-gray-300 mb-3 text-base">
+              <strong className="text-white">Venue:</strong> {event.Venue}
+            </p>
+            <p className="text-gray-300 mb-3 text-base">
+              <strong className="text-white">Time:</strong> {new Date(event.Time).toLocaleString()}
+            </p>
+            <p className="text-gray-300 mb-3 text-base">
+              <strong className="text-white">Status:</strong> {event.Status}
+            </p>
+            <p className="text-gray-300 text-base">
+              <strong className="text-white">Registration:</strong> {event.Registration}
+            </p>
+          </div>
+        </motion.div>
+      ))
+    ) : (
+      <motion.p
+        className="text-center text-gray-400 text-lg"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        No events in this category.
+      </motion.p>
+    )}
+  </>
+);
 
 function Event() {
   const [events, setEvents] = useState([]);
@@ -47,71 +93,103 @@ function Event() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchEventsData()
-      .then(data => {
-        if (Array.isArray(data)) {
-          setEvents(data); // Ensure data is an array
-         
-        } else {
-          throw new Error('Unexpected data format');
-        }
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
+    fetchDataFromCollection('events')
+      .then(data => Array.isArray(data) ? setEvents(data) : Promise.reject('Unexpected data format'))
+      .catch(err => setError(err))
+      .finally(() => setLoading(false));
   }, []);
-  // console.log(events);
 
-  if (loading) return <p className="text-center text-white">Loading events...</p>;
-  if (error) return <p className="text-center text-red-500">{error}</p>;
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-950">
+      <motion.p className="text-white text-xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+        Loading events...
+      </motion.p>
+    </div>
+  );
+  if (error) return <p className="text-center text-red-500 mt-20">{error}</p>;
 
-  // Categorize events
-  const inProgressEvents = events.filter(event => event.Status === 'In progress');
-  const upcomingEvents = events.filter(event => event.Status === 'Upcoming');
-  const completedEvents = events.filter(event => event.Status === 'Completed');
+  // Group events by status
+  const grouped = {
+    upcoming: events.filter(e => e.Status === 'Upcoming'),
+    live: events.filter(e => e.Status === 'In progress'),
+    past: events.filter(e => e.Status === 'Completed'),
+  };
+
+  // Define sections
+  const sections = [
+    { key: 'upcoming', label: 'Upcoming Events', events: grouped.upcoming },
+    { key: 'live', label: 'Live Events', events: grouped.live },
+    { key: 'past', label: 'Past Events', events: grouped.past },
+  ];
 
   return (
-    <div className="relative bg-black text-white font-sans min-h-screen py-8 px-6 md:px-16">
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-gray-800 opacity-40 backdrop-blur-lg -z-10"></div>
+    <div className="relative min-h-screen text-white font-sans py-16 px-6 md:px-16 lg:px-24 overflow-hidden">
+      {/* Animated Background with Gradient and Parallax */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        style={{ background: 'radial-gradient(circle at 50% 50%, #2a1a5e 0%, #0a0a0a 70%)' }}
+        animate={{
+          background: [
+            'radial-gradient(circle at 50% 50%, #2a1a5e 0%, #0a0a0a 70%)',
+            'radial-gradient(circle at 70% 30%, #3b2a8b 0%, #0a0a0a 70%)',
+            'radial-gradient(circle at 30% 60%, #2a1a5e 0%, #0a0a0a 70%)',
+          ],
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+      >
+        {/* Particle-like overlay with glow */}
+        <motion.div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.15) 1px, transparent 0)`,
+            backgroundSize: '40px 40px',
+            filter: 'blur(1px)',
+          }}
+          animate={{ opacity: [0.4, 0.6, 0.4], scale: [1, 1.02, 1] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </motion.div>
 
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-6xl font-bold">Events</h1>
-        <h2 className="text-lg md:text-2xl mt-4">Explore our events</h2>
-      </div>
+      {/* Header */}
+      <header className="relative z-10 text-center my-24">
+        <motion.h1
+          className="text-5xl md:text-7xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-400"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          Events
+        </motion.h1>
+        <motion.p
+          className="mt-4 text-lg md:text-2xl text-gray-300"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          Discover what's happening at CyFuse
+        </motion.p>
+      </header>
 
-      <div className="flex justify-center gap-4 mb-8">
-        <Chip onClick={() => document.getElementById('in-progress-events').scrollIntoView({ behavior: 'smooth' })}>
-          In Progress
-        </Chip>
-        <Chip onClick={() => document.getElementById('upcoming-events').scrollIntoView({ behavior: 'smooth' })}>
-          Upcoming
-        </Chip>
-        <Chip onClick={() => document.getElementById('completed-events').scrollIntoView({ behavior: 'smooth' })}>
-          Completed
-        </Chip>
-      </div>
-
-      <div id="in-progress-events" className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">In Progress Events</h2>
-        {inProgressEvents.length > 0
-          ? inProgressEvents.map((event, index) => <EventCard key={index} event={event} index={index} />)
-          : <p className="text-gray-400">No in-progress events available.</p>}
-      </div>
-
-      <div id="upcoming-events" className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">Upcoming Events</h2>
-        {upcomingEvents.length > 0
-          ? upcomingEvents.map((event, index) => <EventCard key={index} event={event} index={index} />)
-          : <p className="text-gray-400">No upcoming events available.</p>}
-      </div>
-
-      <div id="completed-events" className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">Completed Events</h2>
-        {completedEvents.length > 0
-          ? completedEvents.map((event, index) => <EventCard key={index} event={event} index={index} />)
-          : <p className="text-gray-400">No completed events available.</p>}
+      {/* Event Sections */}
+      <div className="relative z-10">
+        {sections.map(section => (
+          <motion.section
+            key={section.key}
+            variants={sectionVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            className="mb-20"
+          >
+            <h2 className="text-4xl font-bold mb-10 relative text-center group">
+              {section.label}
+              
+            </h2>
+            <Suspense fallback={<EventSkeleton />}>
+              <EventList events={section.events} />
+            </Suspense>
+          </motion.section>
+        ))}
       </div>
     </div>
   );
