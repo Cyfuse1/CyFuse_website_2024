@@ -8,6 +8,10 @@ import Team from './components/Team.jsx';
 import Event from './components/Event.jsx';
 import './index.css';
 import WebLayout from './WebLayout.jsx';
+import ProjectDetail from './components/ProjectDetail.jsx';
+import EventDetail from './components/EventDetail.jsx';
+
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -27,7 +31,10 @@ const router = createBrowserRouter([
       },
       {
         path: 'projects',
-        element: <Projects />
+        children: [
+          { index: true, element: <Projects /> },
+          { path: ':projectId', element: <ProjectDetail /> }
+        ]
       },
       {
         path: 'team',
@@ -35,7 +42,10 @@ const router = createBrowserRouter([
       },
       {
         path: 'events',
-        element: <Event />
+        children: [
+          { index: true, element: <Event /> },
+          { path: ':eventId', element: <EventDetail /> }
+        ]
       }
     ]
   }

@@ -27,7 +27,7 @@ function Header() {
     <header className={wrapperClasses}>
       <div className={innerClasses}>
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2 px-3">
           <img src={CyfuseLogo} alt="CyFuse Logo" className="w-6 h-8 md:w-7 md:h-12" />
         </Link>
 
