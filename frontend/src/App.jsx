@@ -8,6 +8,8 @@ import Events from './components/Events';
 import EventDetail from './components/EventDetail';
 import WebLayout from './WebLayout';
 
+import './index.css';
+
 function App() {
   return (
     <Router>

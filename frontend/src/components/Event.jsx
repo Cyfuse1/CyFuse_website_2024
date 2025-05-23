@@ -20,9 +20,9 @@ const cardVariants = {
 
 // Skeleton Loader Component for Events
 const EventSkeleton = () => (
-  <div className="flex flex-col md:flex-row bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 md:p-8 mb-8 mx-4 animate-pulse">
-    <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
-      <div className="w-full md:w-48 h-40 rounded-xl bg-gray-700"></div>
+  <div className="flex flex-col bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 md:p-6 w-full md:w-[32%] animate-pulse">
+    <div className="flex-shrink-0 mb-4">
+      <div className="w-full h-48 rounded-xl bg-gray-700"></div>
     </div>
     <div className="flex-1 space-y-3">
       <div className="h-6 w-3/4 rounded bg-gray-700"></div>
@@ -38,42 +38,43 @@ const EventSkeleton = () => (
 const EventList = ({ events }) => (
   <>
     {events.length ? (
-      events.map((event, idx) => (
-        <motion.div
-          key={idx}
-          variants={cardVariants}
-          className="flex flex-col md:flex-row bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 md:p-8 mb-8 mx-4 shadow-lg hover:shadow-xl hover:border-purple-500/30 transition-all duration-300 hover:-rotate-1"
-          style={{ marginLeft: idx % 2 === 0 ? '0' : '2rem' }} // Staggered margin for visual flow
-        >
-          <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
-            <img
-              src={event.Picture || 'https://via.placeholder.com/150'}
-              alt={event.Title}
-              className="w-full md:w-48 h-auto rounded-xl object-cover border border-white/10"
-            />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-2xl font-semibold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-400">
-              {event.Title}
-            </h3>
-            <p className="text-gray-300 mb-3 text-base leading-relaxed">
-              <strong className="text-white">Description:</strong> {event.Description}
-            </p>
-            <p className="text-gray-300 mb-3 text-base">
-              <strong className="text-white">Venue:</strong> {event.Venue}
-            </p>
-            <p className="text-gray-300 mb-3 text-base">
-              <strong className="text-white">Time:</strong> {new Date(event.Time).toLocaleString()}
-            </p>
-            <p className="text-gray-300 mb-3 text-base">
-              <strong className="text-white">Status:</strong> {event.Status}
-            </p>
-            <p className="text-gray-300 text-base">
-              <strong className="text-white">Registration:</strong> {event.Registration}
-            </p>
-          </div>
-        </motion.div>
-      ))
+      <div className="flex flex-wrap justify-center gap-6 px-4">
+        {events.map((event, idx) => (
+          <motion.div
+            key={idx}
+            variants={cardVariants}
+            className="flex flex-col bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 md:p-6 w-full md:w-[20%] shadow-lg hover:shadow-xl hover:border-purple-500/30 transition-all duration-300 hover:-rotate-1"
+          >
+            <div className="flex-shrink-0 mb-4">
+              <img
+                src={event.Picture || 'https://via.placeholder.com/150'}
+                alt={event.Title}
+                className="w-full h-48 rounded-xl object-cover border border-white/10"
+              />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-semibold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-400">
+                {event.Title}
+              </h3>
+              <p className="text-gray-300 mb-2 text-sm leading-relaxed">
+                <strong className="text-white">Description:</strong> {event.Description}
+              </p>
+              <p className="text-gray-300 mb-2 text-sm">
+                <strong className="text-white">Venue:</strong> {event.Venue}
+              </p>
+              <p className="text-gray-300 mb-2 text-sm">
+                <strong className="text-white">Time:</strong> {new Date(event.Time).toLocaleString()}
+              </p>
+              <p className="text-gray-300 mb-2 text-sm">
+                <strong className="text-white">Status:</strong> {event.Status}
+              </p>
+              <p className="text-gray-300 text-sm">
+                <strong className="text-white">Registration:</strong> {event.Registration}
+              </p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
     ) : (
       <motion.p
         className="text-center text-gray-400 text-lg"
@@ -183,9 +184,14 @@ function Event() {
           >
             <h2 className="text-4xl font-bold mb-10 relative text-center group">
               {section.label}
-              
             </h2>
-            <Suspense fallback={<EventSkeleton />}>
+            <Suspense fallback={
+              <div className="flex flex-wrap justify-center gap-6 px-4">
+                <EventSkeleton />
+                <EventSkeleton />
+                <EventSkeleton />
+              </div>
+            }>
               <EventList events={section.events} />
             </Suspense>
           </motion.section>

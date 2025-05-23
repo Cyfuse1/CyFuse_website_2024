@@ -28,7 +28,7 @@ function Header() {
       <div className={innerClasses}>
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 px-3">
-          <img src={CyfuseLogo} alt="CyFuse Logo" className="w-6 h-8 md:w-7 md:h-12" />
+          <img src={CyfuseLogo} alt="CyFuse Logo" className="w-6 h-auto md:w-auto md:h-10"  style={{objectFit: "cover"}}/>
         </Link>
 
         {/* Desktop Nav Pills */}
@@ -55,13 +55,13 @@ function Header() {
           <button onClick={() => setIsNavActive(p => !p)} aria-label="Toggle nav">
             <div className="space-y-1.5">
               <span
-                className={`block w-6 h-0.5 transition-transform duration-300 ${isNavActive ? 'rotate-45 translate-y-2 bg-white' : 'bg-gray-900'}`}
+                className={`block w-6 h-0.5 transition-transform duration-300 ${isNavActive ? 'rotate-45 translate-y-2 bg-white' : 'bg-gray-100'}`}
               />
               <span
-                className={`block w-6 h-0.5 transition-opacity duration-300 ${isNavActive ? 'opacity-0' : 'bg-gray-900'}`}
+                className={`block w-6 h-0.5 transition-opacity duration-300 ${isNavActive ? 'opacity-0' : 'bg-gray-100'}`}
               />
               <span
-                className={`block w-6 h-0.5 transition-transform duration-300 ${isNavActive ? '-rotate-45 -translate-y-2 bg-white' : 'bg-gray-900'}`}
+                className={`block w-6 h-0.5 transition-transform duration-300 ${isNavActive ? '-rotate-45 -translate-y-2 bg-white' : 'bg-gray-100'}`}
               />
             </div>
           </button>
