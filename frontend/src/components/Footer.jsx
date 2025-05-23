@@ -55,7 +55,7 @@ function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/about"
+                  to="/aboutus"
                   className="text-gray-400 text-sm hover:text-indigo-400 transition-colors"
                 >
                   About Us

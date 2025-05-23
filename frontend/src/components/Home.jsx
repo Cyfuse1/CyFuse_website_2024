@@ -37,35 +37,89 @@ export default function Home() {
   const horizontalRef = useRef(null);
   const containerRef = useRef(null);
 
-  useEffect(() => {
-    if (!horizontalRef.current || !containerRef.current) return;
+  // useEffect(() => {
+  //   if (!horizontalRef.current || !containerRef.current) return;
 
-    const sections = horizontalRef.current.children;
-    const totalWidth = sections.length * 100;
+  //   const sections = horizontalRef.current.children;
+  //   const totalWidth = sections.length * 100;
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
+  //   const tl = gsap.timeline({
+  //     scrollTrigger: {
+  //       trigger: containerRef.current,
+  //       start: "top top",
+  //       end: "bottom bottom",
+  //       scrub: 1,
+  //       pin: true,
+  //       anticipatePin: 1,
+  //     },
+  //   });
+
+  //   tl.to(horizontalRef.current, { x: `-${totalWidth - 100}vw`, ease: "none" });
+
+  //   return () => {
+  //     ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+  //   };
+  // }, []);
+
+ useEffect(() => {
+  if (!horizontalRef.current || !containerRef.current) return;
+
+  const updateScroll = () => {
+    const container = containerRef.current;
+    const horizontal = horizontalRef.current;
+    const scrollWidth = horizontal.scrollWidth;
+    const viewportWidth = window.innerWidth;
+
+    // Set your desired margin (in px) from the LEFT edge
+    const marginLeft = viewportWidth * 0.02; // e.g., 2% of viewport width
+
+    // Calculate max scroll so last card stops at marginLeft from left
+    const maxScroll = Math.max(0, scrollWidth - viewportWidth - marginLeft);
+
+    // Kill previous triggers
+    ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+
+    if (scrollWidth > viewportWidth + marginLeft) {
+      gsap.to(horizontal, {
+        x: -maxScroll,
+        ease: "power1.out", // Smoother ease
+        scrollTrigger: {
+          trigger: container,
+          start: "top top",
+          end: () => `+=${maxScroll}`,
+          scrub: 0.2, // Lower value = faster response
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+    } else {
+      gsap.set(horizontal, { x: 0 });
+      ScrollTrigger.create({
+        trigger: container,
         start: "top top",
-        end: "bottom bottom",
-        scrub: 1,
+        end: () => `+=${window.innerHeight}`,
         pin: true,
         anticipatePin: 1,
-      },
-    });
+        invalidateOnRefresh: true,
+      });
+    }
+  };
 
-    tl.to(horizontalRef.current, { x: `-${totalWidth - 100}vw`, ease: "none" });
+  updateScroll();
+  window.addEventListener("resize", updateScroll);
 
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, []);
+  return () => {
+    window.removeEventListener("resize", updateScroll);
+    ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+  };
+}, []);
 
   const announcements = [
     {
       id: 1,
       title: "New Project Launch",
-      date: "May 20, 2025",
+      date: "June 20, 2025",
       content: "Join us for the launch of our latest AI-powered project next week!",
       image: CyfuseLogo, // Use imported logo
       link: "/events/project-launch",
@@ -73,7 +127,7 @@ export default function Home() {
     {
       id: 2,
       title: "Hackathon Registration Open",
-      date: "May 15, 2025",
+      date: "June 15, 2025",
       content: "Register now for our annual hackathon. Limited spots available!",
       image: CyfuseLogo,
       link: "/events/hackathon",
@@ -81,7 +135,7 @@ export default function Home() {
     {
       id: 3,
       title: "Workshop Series",
-      date: "May 10, 2025",
+      date: "June 10, 2025",
       content: "New workshop series on Web3 technologies starting this month.",
       image: CyfuseLogo,
       link: "/events/workshops",
@@ -212,7 +266,7 @@ export default function Home() {
       </motion.section>
 
       {/* Horizontal Scroll Container */}
-      <div ref={containerRef} className="relative h-[200vh] z-10">
+      <div ref={containerRef} className="relative h-[100vh] z-10">
         <div className="sticky top-0 h-screen overflow-hidden">
           <div ref={horizontalRef} className="flex w-[200vw] h-full">
             {/* Projects Section */}
@@ -239,7 +293,7 @@ export default function Home() {
                     className="md:w-1/2"
                   >
                     <div className="relative overflow-hidden rounded-xl border-2 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-                      <img src={Project} alt="Featured Project" className="w-full h-auto" />
+                      <img src={Project} alt="Featured Project" className="w-full h-[70vh]" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6">
                         <span className="px-3 py-1 bg-indigo-600/80 text-white text-sm rounded-full w-fit mb-3">
                           Featured
@@ -302,7 +356,7 @@ export default function Home() {
                     className="md:w-1/2"
                   >
                     <div className="relative overflow-hidden rounded-xl border-2 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-                      <img src={Event} alt="Featured Event" className="w-full h-auto" />
+                      <img src={Event} alt="Featured Event" className="w-full h-[70vh]" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6">
                         <div className="flex items-center gap-3 mb-3">
                           <span className="px-3 py-1 bg-indigo-600/80 text-white text-sm rounded-full">Upcoming</span>
