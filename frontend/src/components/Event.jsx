@@ -1,4 +1,4 @@
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchPaginatedData } from './script';
 import { motion } from 'framer-motion';
 
@@ -41,7 +41,7 @@ const EventList = ({ events }) => (
       <div className="flex flex-wrap justify-center gap-6 px-4">
         {events.map((event) => (
           <motion.div
-            key={event.id} // Changed from idx to event.id
+            key={event.id}
             variants={cardVariants}
             className="flex flex-col bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 md:p-6 w-full md:w-[20%] shadow-lg hover:shadow-xl hover:border-purple-500/30 transition-all duration-300 hover:-rotate-1"
           >
@@ -91,46 +91,176 @@ const EventList = ({ events }) => (
 function Event() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(false); // For pagination loading
   const [error, setError] = useState(null);
   const [lastDoc, setLastDoc] = useState(null);
   const [hasMore, setHasMore] = useState(true);
-  const LIMIT = 8;
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1); // Track total pages
+  const LIMIT = 8;
 
-  const loadEvents = async () => {
-    setLoading(true);
+  // Scroll to top of events section
+  const scrollToTop = () => {
+    const eventsSection = document.getElementById('events-section');
+    if (eventsSection) {
+      eventsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Fetch events for a specific page
+  const fetchPage = async (page) => {
+    setPageLoading(true);
     try {
-      const { data, lastDoc: newLastDoc, empty } = await fetchPaginatedData('events', LIMIT, lastDoc); // Fixed destructuring to include empty
-      console.log('Fetched page:', currentPage, data);
+      let newLastDoc = null;
+      let fetchedEvents = [];
+      let skip = (page - 1) * LIMIT;
 
-      setEvents(prev => [...prev, ...data]);
-      setLastDoc(newLastDoc); // Fixed typo by removing extra 'S'
-      setHasMore(!empty && data.length === LIMIT);
-      setCurrentPage(prev => prev + 1);
+      // Reset events and lastDoc for non-sequential navigation
+      setEvents([]);
+      setLastDoc(null);
+
+      // Fetch events until we reach the desired page
+      while (fetchedEvents.length < skip + LIMIT && hasMore) {
+        const { data, lastDoc: nextLastDoc, empty } = await fetchPaginatedData('events', LIMIT, newLastDoc);
+        fetchedEvents = [...fetchedEvents, ...data];
+        newLastDoc = nextLastDoc;
+        setHasMore(!empty && data.length === LIMIT);
+        if (empty || data.length < LIMIT) break;
+      }
+
+      // Slice the events for the current page
+      const pageEvents = fetchedEvents.slice(skip, skip + LIMIT);
+      setEvents(pageEvents);
+      setLastDoc(newLastDoc);
+      setCurrentPage(page);
+      // Estimate total pages
+      setTotalPages(Math.max(totalPages, Math.ceil(fetchedEvents.length / LIMIT)));
+      scrollToTop();
     } catch (err) {
       console.error('Error fetching events:', err);
-      setError('Failed to fetch events');
+      setError('Failed to fetch events. Please try again later.');
     } finally {
+      setPageLoading(false);
       setLoading(false);
     }
   };
 
+  // Handle initial load
   useEffect(() => {
     const loadInitial = async () => {
       try {
-        const { data, lastDoc: newLastDoc, empty } = await fetchPaginatedData('events', LIMIT, lastDoc);
+        const { data, lastDoc: newLastDoc, empty } = await fetchPaginatedData('events', LIMIT, null);
         setEvents(data);
         setLastDoc(newLastDoc);
         setHasMore(!empty && data.length === LIMIT);
+        setTotalPages(Math.max(totalPages, 1));
       } catch (err) {
-        setError('Failed to fetch events');
-        console.log(err);
+        setError('Failed to fetch events. Please try again later.');
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
     loadInitial();
   }, []);
+
+  // Handle page navigation
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages && page !== currentPage) {
+      fetchPage(page);
+    }
+  };
+
+  // Handle First, Prev, Next, Last
+  const handleFirst = () => handlePageChange(1);
+  const handlePrev = () => handlePageChange(currentPage - 1);
+  const handleNext = () => {
+    if (hasMore) {
+      fetchPage(currentPage + 1);
+    }
+  };
+  const handleLast = () => handlePageChange(totalPages);
+
+  // Pagination buttons
+  const renderPagination = () => {
+    const pageButtons = [];
+    const maxPagesToShow = 3; // Show up to 3 page numbers
+    let startPage = Math.max(1, currentPage - 1);
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage < maxPagesToShow - 1) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageButtons.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          disabled={pageLoading}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition duration-300 ${
+            currentPage === i
+              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+              : pageLoading
+              ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    return (
+      <div className="flex justify-center items-center gap-2 mt-8">
+        <button
+          onClick={handleFirst}
+          disabled={currentPage === 1 || pageLoading}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition duration-300 ${
+            currentPage === 1 || pageLoading
+              ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+          }`}
+        >
+          First
+        </button>
+        <button
+          onClick={handlePrev}
+          disabled={currentPage === 1 || pageLoading}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition duration-300 ${
+            currentPage === 1 || pageLoading
+              ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+          }`}
+        >
+          Prev
+        </button>
+        {pageButtons}
+        <button
+          onClick={handleNext}
+          disabled={!hasMore || pageLoading}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition duration-300 ${
+            !hasMore || pageLoading
+              ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+          }`}
+        >
+          Next
+        </button>
+        <button
+          onClick={handleLast}
+          disabled={currentPage === totalPages || !hasMore || pageLoading}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition duration-300 ${
+            currentPage === totalPages || !hasMore || pageLoading
+              ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+          }`}
+        >
+          Last
+        </button>
+      </div>
+    );
+  };
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-gray-950">
@@ -139,7 +269,18 @@ function Event() {
       </motion.p>
     </div>
   );
-  if (error) return <p className="text-center text-red-500 mt-20">{error}</p>;
+  if (error) return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-950">
+      <motion.p
+        className="text-center text-red-500 text-lg"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {error}
+      </motion.p>
+    </div>
+  );
 
   // Group events by status
   const grouped = {
@@ -156,7 +297,11 @@ function Event() {
   ];
 
   return (
-    <div className="relative min-h-screen text-white font-sans py-16 px-6 md:px-16 lg:px-24 overflow-hidden">
+    <div
+      id="events-section"
+      className="relative min-h-screen text-white font-sans py-16 px-6 md:px-16 lg:px-24 overflow-auto"
+      style={{ scrollbarWidth: 'thin', scrollbarColor: '#d16ba5 transparent' }}
+    >
       {/* Animated Background with Gradient and Parallax */}
       <motion.div
         className="absolute inset-0 z-0"
@@ -170,7 +315,6 @@ function Event() {
         }}
         transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
       >
-        {/* Particle-like overlay with glow */}
         <motion.div
           className="absolute inset-0"
           style={{
@@ -214,18 +358,17 @@ function Event() {
             viewport={{ once: true, amount: 0.2 }}
             className="mb-20"
           >
-            <h2 className="text-4xl font-bold mb-10 text-center group">{section.label}</h2>
-            <EventList events={section.events} />
-            {section.key === 'past' && hasMore && (
-              <div className="flex justify-center mt-8">
-                <button
-                  onClick={loadEvents}
-                  className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:from-purple-600 hover:to-pink-600 transition duration-300 shadow-lg"
-                >
-                  Load More
-                </button>
+            <h2 className="text-4xl font-bold mb-10 text-center">{section.label}</h2>
+            {pageLoading && section.key === 'past' ? (
+              <div className="flex flex-wrap justify-center gap-6 px-4">
+                {Array.from({ length: LIMIT }).map((_, i) => (
+                  <EventSkeleton key={i} />
+                ))}
               </div>
+            ) : (
+              <EventList events={section.events} />
             )}
+            {section.key === 'past' && renderPagination()}
           </motion.section>
         ))}
       </div>
