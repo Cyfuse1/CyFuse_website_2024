@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -7,8 +7,7 @@ import AnnouncementSlider from "./announcement-slider";
 import GradientButton from "./gradient-button";
 import { ArrowRight, Code, Calendar } from "lucide-react";
 import HeroVideo from "../Assets/hero.mp4";
-import CyfuseLogo from "../Assets/CyFuseLogo.png";
-
+import { fetchDataFromCollection } from "./script";
 import About from "../Assets/about-bg.png";
 import Project from "../Assets/project-home-bg.png";
 import Event from "../Assets/events-home-bg.png";
@@ -33,34 +32,33 @@ const cardVariants = {
   visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
+
+
 export default function Home() {
   const horizontalRef = useRef(null);
   const containerRef = useRef(null);
-
-  // useEffect(() => {
-  //   if (!horizontalRef.current || !containerRef.current) return;
-
-  //   const sections = horizontalRef.current.children;
-  //   const totalWidth = sections.length * 100;
-
-  //   const tl = gsap.timeline({
-  //     scrollTrigger: {
-  //       trigger: containerRef.current,
-  //       start: "top top",
-  //       end: "bottom bottom",
-  //       scrub: 1,
-  //       pin: true,
-  //       anticipatePin: 1,
-  //     },
-  //   });
-
-  //   tl.to(horizontalRef.current, { x: `-${totalWidth - 100}vw`, ease: "none" });
-
-  //   return () => {
-  //     ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-  //   };
-  // }, []);
-
+  const [Announcements, setAnnouncements] = useState([
+    {
+      id: 0,
+      title: "No New Announcements for now",
+      date: "To be Announced Eventually",
+      content: "We will be right back with some exciting updates soon! Stay tuned for more information.",
+      image: "https://blocks.astratic.com/img/general-img-portrait.png",
+      link: "/",
+    },
+  ]);
+  const fetchAnnouncements = async () => {
+    try {
+      const data = await fetchDataFromCollection("Announcements");
+      if(data.length === 0) {
+        console.warn("No announcements found, using fallback data.");
+        return;
+      }
+      setAnnouncements(data);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+    }
+  }
  useEffect(() => {
   if (!horizontalRef.current || !containerRef.current) return;
 
@@ -115,32 +113,26 @@ export default function Home() {
   };
 }, []);
 
-  const announcements = [
+
+  useEffect(() => {
+    const fall_back_announcements = [
     {
-      id: 1,
-      title: "New Project Launch",
-      date: "June 20, 2025",
-      content: "Join us for the launch of our latest AI-powered project next week!",
-      image: CyfuseLogo, // Use imported logo
-      link: "/events/project-launch",
-    },
-    {
-      id: 2,
-      title: "Hackathon Registration Open",
-      date: "June 15, 2025",
-      content: "Register now for our annual hackathon. Limited spots available!",
-      image: CyfuseLogo,
-      link: "/events/hackathon",
-    },
-    {
-      id: 3,
-      title: "Workshop Series",
-      date: "June 10, 2025",
-      content: "New workshop series on Web3 technologies starting this month.",
-      image: CyfuseLogo,
-      link: "/events/workshops",
+      id: 0,
+      title: "No New Announcements for now",
+      date: "To be Announced Eventually",
+      content: "We will be right back with some exciting updates soon! Stay tuned for more information.",
+      image: "https://blocks.astratic.com/img/general-img-portrait.png",
+      link: "/",
     },
   ];
+    fetchAnnouncements();
+    if (Announcements.length === 0) {
+      setAnnouncements(fall_back_announcements);
+    }
+    if(!Announcements) {
+      setAnnouncements(fall_back_announcements);
+    }
+  }, [Announcements]);
 
   return (
     <div className="relative min-h-screen text-white font-sans overflow-hidden">
@@ -222,7 +214,7 @@ export default function Home() {
             </h2>
             <div className="h-1 w-20 bg-indigo-500 rounded" />
           </motion.div>
-          <AnnouncementSlider announcements={announcements} />
+          <AnnouncementSlider announcements={Announcements} />
         </div>
       </section>
 
@@ -235,12 +227,12 @@ export default function Home() {
         className="flex flex-col md:flex-row justify-center items-center w-full h-auto py-10 md:h-screen relative px-4 z-[5]"
       >
         <motion.div variants={cardVariants} className="flex flex-col justify-center items-start z-[5]">
-          <h1 className="text-2xl md:text-3xl mx-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-400">
+          <h1 className="text-3xl md:text-4xl mx-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-400">
             About Us
           </h1>
           <Link to="/aboutus" className="mt-4">
             <motion.span
-              className="mx-2 my-2 px-4 py-2 bg-white/5 backdrop-blur-lg border border-white/10 rounded-full cursor-pointer text-sm md:text-base transition-all duration-300 hover:bg-indigo-500/10 hover:border-indigo-500/30"
+              className="mx-3 my-2 px-4 py-2 bg-white/5 backdrop-blur-lg border border-white/10 rounded-full cursor-pointer text-sm md:text-base transition-all duration-300 hover:bg-indigo-500/10 hover:border-indigo-500/30"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -382,7 +374,6 @@ export default function Home() {
                       enthusiasts, learn new skills, and showcase your talents.
                     </p>
                     <div className="flex flex-wrap gap-3 mb-8">
-                      <span className="px-3 py-1 bg-white/10 rounded-full text-sm">Hackath струйные принтеры</span>
                       <span className="px-3 py-1 bg-white/10 rounded-full text-sm">Workshops</span>
                       <span className="px-3 py-1 bg-white/10 rounded-full text-sm">Tech Talks</span>
                       <span className="px-3 py-1 bg-white/10 rounded-full text-sm">Networking</span>

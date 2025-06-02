@@ -43,7 +43,7 @@ function Header() {
             <Link
               key={label}
               to={to}
-              className="px-4 py-2 rounded-full font-medium hover:opacity-80 transition-opacity duration-200"
+              className="px-4 py-2 rounded-full font-medium hover:opacity-80 transition-opacity duration-200 text-lg"
             >
               {label}
             </Link>
@@ -78,7 +78,7 @@ function Header() {
                 <Link
                   key={label}
                   to={to}
-                  className="text-white px-3 py-2 rounded-full hover:opacity-80 transition-opacity duration-200"
+                  className="text-white px-3 py-2 rounded-full hover:opacity-80 transition-opacity duration-200 "
                   onClick={() => setIsNavActive(false)}
                 >
                   {label}

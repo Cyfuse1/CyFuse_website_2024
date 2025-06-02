@@ -1,5 +1,5 @@
 import { useEffect, useState, Suspense } from 'react';
-import { fetchDataFromCollection } from './script';
+import { fetchPaginatedData } from './script';
 import { motion } from 'framer-motion';
 
 // Framer Motion variants
@@ -39,15 +39,15 @@ const EventList = ({ events }) => (
   <>
     {events.length ? (
       <div className="flex flex-wrap justify-center gap-6 px-4">
-        {events.map((event, idx) => (
+        {events.map((event) => (
           <motion.div
-            key={idx}
+            key={event.id} // Changed from idx to event.id
             variants={cardVariants}
             className="flex flex-col bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 md:p-6 w-full md:w-[20%] shadow-lg hover:shadow-xl hover:border-purple-500/30 transition-all duration-300 hover:-rotate-1"
           >
             <div className="flex-shrink-0 mb-4">
               <img
-                src={event.Picture || 'https://via.placeholder.com/150'}
+                src={event.Picture || 'https://blocks.astratic.com/img/general-img-portrait.png'}
                 alt={event.Title}
                 className="w-full h-48 rounded-xl object-cover border border-white/10"
               />
@@ -92,12 +92,44 @@ function Event() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastDoc, setLastDoc] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const LIMIT = 8;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const loadEvents = async () => {
+    setLoading(true);
+    try {
+      const { data, lastDoc: newLastDoc, empty } = await fetchPaginatedData('events', LIMIT, lastDoc); // Fixed destructuring to include empty
+      console.log('Fetched page:', currentPage, data);
+
+      setEvents(prev => [...prev, ...data]);
+      setLastDoc(newLastDoc); // Fixed typo by removing extra 'S'
+      setHasMore(!empty && data.length === LIMIT);
+      setCurrentPage(prev => prev + 1);
+    } catch (err) {
+      console.error('Error fetching events:', err);
+      setError('Failed to fetch events');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetchDataFromCollection('events')
-      .then(data => Array.isArray(data) ? setEvents(data) : Promise.reject('Unexpected data format'))
-      .catch(err => setError(err))
-      .finally(() => setLoading(false));
+    const loadInitial = async () => {
+      try {
+        const { data, lastDoc: newLastDoc, empty } = await fetchPaginatedData('events', LIMIT, lastDoc);
+        setEvents(data);
+        setLastDoc(newLastDoc);
+        setHasMore(!empty && data.length === LIMIT);
+      } catch (err) {
+        setError('Failed to fetch events');
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadInitial();
   }, []);
 
   if (loading) return (
@@ -182,18 +214,18 @@ function Event() {
             viewport={{ once: true, amount: 0.2 }}
             className="mb-20"
           >
-            <h2 className="text-4xl font-bold mb-10 relative text-center group">
-              {section.label}
-            </h2>
-            <Suspense fallback={
-              <div className="flex flex-wrap justify-center gap-6 px-4">
-                <EventSkeleton />
-                <EventSkeleton />
-                <EventSkeleton />
+            <h2 className="text-4xl font-bold mb-10 text-center group">{section.label}</h2>
+            <EventList events={section.events} />
+            {section.key === 'past' && hasMore && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={loadEvents}
+                  className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:from-purple-600 hover:to-pink-600 transition duration-300 shadow-lg"
+                >
+                  Load More
+                </button>
               </div>
-            }>
-              <EventList events={section.events} />
-            </Suspense>
+            )}
           </motion.section>
         ))}
       </div>

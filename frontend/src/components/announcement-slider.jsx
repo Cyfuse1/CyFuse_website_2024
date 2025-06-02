@@ -61,7 +61,7 @@ export default function AnnouncementSlider({ announcements }) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="aspect-[16/7] md:aspect-[21/9] relative">
+      <div className="aspect-[15/7] md:aspect-[21/9] relative">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={currentIndex}

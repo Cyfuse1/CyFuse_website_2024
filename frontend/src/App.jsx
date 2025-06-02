@@ -8,6 +8,7 @@ import Events from './components/Events';
 import EventDetail from './components/EventDetail';
 import WebLayout from './WebLayout';
 
+import './App.css';
 import './index.css';
 
 function App() {

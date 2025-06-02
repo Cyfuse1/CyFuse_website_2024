@@ -1,0 +1,40 @@
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+    width: 10px;
+    background: transparent; /* Fully transparent scrollbar track */
+}
+
+::-webkit-scrollbar-track {
+    background: transparent; /* Transparent track for consistency */
+    border-radius: 8px; /* Smooth rounded edges */
+}
+
+::-webkit-scrollbar-button {
+    display: none; /* Hide scrollbar arrows for a cleaner look */
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #d16ba5 0%, #86a8e7 50%, #5ffbf1 100%);
+    border-radius: 8px;
+    border: 2px solid transparent; /* Border for padding effect */
+    background-clip: padding-box; /* Ensures gradient doesn't bleed into border */
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    transition: background 0.3s ease; /* Smooth hover transition */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin; /* Slim scrollbar */
+    scrollbar-color: #d16ba5 transparent; /* Thumb uses primary gradient color, transparent track */
+}
+
+/* Optional: Ensure body or container has no conflicting backgrounds */
+body {
+    scrollbar-width: thin; /* Reinforce for Firefox */
+    scrollbar-color: #d16ba5 transparent;
+}
