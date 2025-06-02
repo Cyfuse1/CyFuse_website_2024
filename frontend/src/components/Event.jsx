@@ -299,8 +299,7 @@ function Event() {
   return (
     <div
       id="events-section"
-      className="relative min-h-screen text-white font-sans py-16 px-6 md:px-16 lg:px-24 overflow-auto"
-      style={{ scrollbarWidth: 'thin', scrollbarColor: '#d16ba5 transparent' }}
+      className="relative min-h-screen text-white font-sans py-16 px-6 md:px-16 lg:px-24 overflow-hidden"
     >
       {/* Animated Background with Gradient and Parallax */}
       <motion.div
