@@ -1,18 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
+import { createHashRouter, Navigate, RouterProvider } from 'react-router-dom';
 import About from './components/About.jsx';
+import Event from './components/Event.jsx';
+import EventDetail from './components/EventDetail.jsx';
 import Home from './components/Home.jsx';
+import ProjectDetail from './components/ProjectDetail.jsx';
 import Projects from './components/Projects.jsx';
 import Team from './components/Team.jsx';
-import Event from './components/Event.jsx';
 import './index.css';
 import WebLayout from './WebLayout.jsx';
-import ProjectDetail from './components/ProjectDetail.jsx';
-import EventDetail from './components/EventDetail.jsx';
 
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: '/',
     element: <WebLayout />,
