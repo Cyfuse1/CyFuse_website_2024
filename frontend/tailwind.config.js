@@ -1,3 +1,4 @@
+const {heroui} = require('@heroui/theme');
 const { nextui } = require('@nextui-org/theme');
 
 /** @type {import('tailwindcss').Config} */
@@ -6,6 +7,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
     "./node_modules/@nextui-org/theme/dist/components/(button|chip|ripple|spinner).js",
+    "./node_modules/@heroui/theme/dist/components/(card|ripple).js"
   ],
   theme: {
     extend: {
@@ -53,5 +55,5 @@ export default {
       },
     },
   },
-  plugins: [nextui()],
+  plugins: [nextui(),heroui()],
 };
