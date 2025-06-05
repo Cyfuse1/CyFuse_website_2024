@@ -1,7 +1,8 @@
-import { useEffect, useState, Suspense } from 'react';
-import { fetchDataFromCollection } from './script';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
+import { Suspense, useEffect, useState } from 'react';
+import { ProfileCard } from './profileCard';
+import { fetchDataFromCollection } from './script';
 
 // Framer Motion variants for card animations
 const cardVariants = {
@@ -66,37 +67,20 @@ const TeamSection = ({ section, members }) => {
     >
       <h2 className="text-4xl font-bold mb-10 text-center">{sectionName}</h2>
       <div className="flex flex-wrap -mx-2 items-center justify-center">
-        {members.map((member, idx) => (
-          <div key={idx} className="px-2 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 pb-4">
-            <motion.div
-              variants={cardVariants}
-              className="flex flex-col items-center p-6 bg-white/10 backdrop-blur-lg border border-white/10 rounded-2xl shadow-lg hover:shadow-xl hover:border-blue-500/30 transition-all duration-300 h-96"
-            >
-              <img
-                src={member.photo || 'https://via.placeholder.com/150'}
-                alt={member.name}
-                onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/150'; }}
-                className="w-32 h-32 rounded-full object-cover mb-4 border border-white/10"
-              />
-              <p className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-cyan-400">
-                {member.name}
-              </p>
-              {member.quote && <p className="text-sm italic text-gray-400 mt-2">"{member.quote}"</p>}
-              <div className="flex gap-3 mt-4">
-                {member.linkedin && (
-                  <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
-                    LinkedIn
-                  </a>
-                )}
-                {member.instagram && (
-                  <a href={member.instagram} target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:underline">
-                    Instagram
-                  </a>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        ))}
+        {members.map((member, idx) => {
+          const profile = {
+            name: member.name,
+            imageUrl: member.photo || 'https://via.placeholder.com/150',
+            description: member.quote,
+            
+            ...member,      // in case you want to pass more fields
+          };
+          return (
+            <div key={idx} className="px-2 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 pb-4 flex justify-center">
+              <ProfileCard profile={profile} />
+            </div>
+          );
+        })}
       </div>
     </motion.section>
   );
