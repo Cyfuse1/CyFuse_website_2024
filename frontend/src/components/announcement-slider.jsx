@@ -52,8 +52,10 @@ export default function AnnouncementSlider({ announcements }) {
     startAutoplay()
   }
 
-  const { title, date, content, image } = announcements[currentIndex]
-
+  const { Title, Time, Description, Picture } = announcements[currentIndex]
+  const date = Time?.seconds
+  ? new Date(Time.seconds * 1000).toISOString().split("T")[0] // → "YYYY-MM-DD"
+  : "Invalid date";
   return (
     <div
       ref={sliderRef}
@@ -74,8 +76,8 @@ export default function AnnouncementSlider({ announcements }) {
           >
             <div className="relative h-full w-full overflow-hidden rounded-xl">
               <img
-                src={image || "/placeholder.svg"}
-                alt={title}
+                src={Picture || "/placeholder.svg"}
+                alt={Title}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-6 md:p-10">
@@ -83,8 +85,8 @@ export default function AnnouncementSlider({ announcements }) {
                   <Calendar className="h-4 w-4 mr-2" />
                   <span className="text-sm">{date}</span>
                 </div>
-                <h3 className="text-2xl md:text-3xl font-bold mb-2">{title}</h3>
-                <p className="text-gray-300 mb-4 max-w-2xl">{content}</p>
+                <h3 className="text-2xl md:text-3xl font-bold mb-2">{Title}</h3>
+                <p className="text-gray-300 mb-4 max-w-2xl">{Description}</p>
               </div>
             </div>
           </motion.div>
@@ -129,11 +131,14 @@ AnnouncementSlider.propTypes = {
   announcements: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
-      title: PropTypes.string.isRequired,
-      date: PropTypes.string.isRequired,
-      content: PropTypes.string.isRequired,
-      image: PropTypes.string,
-      link: PropTypes.string,
+      Title: PropTypes.string.isRequired,
+      Time: PropTypes.shape({
+        seconds: PropTypes.number.isRequired,
+        nanoseconds: PropTypes.number,
+      }).isRequired,
+      Description: PropTypes.string.isRequired,
+      Picture: PropTypes.string,
+      Link: PropTypes.string,
     })
   ).isRequired,
 }

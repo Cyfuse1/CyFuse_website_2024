@@ -1,5 +1,9 @@
+// Event.jsx
+// Copy this entire file into your project. Ensure `script.js` (with fetchDataFromCollection and fetchPaginatedData) lives alongside it.
+// No other changes are required.
+
 import { useEffect, useState } from 'react';
-import { fetchPaginatedData } from './script';
+import { fetchPaginatedData, fetchDataFromCollection } from './script';
 import { motion } from 'framer-motion';
 
 // Framer Motion variants
@@ -20,7 +24,7 @@ const cardVariants = {
 
 // Skeleton Loader Component for Events
 const EventSkeleton = () => (
-  <div className="flex flex-col bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 md:p-6 w-full md:w-[32%] animate-pulse">
+  <div className="flex flex-col bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 md:p-6 w-full sm:w-[45%] md:w-[30%] lg:w-[22%] animate-pulse">
     <div className="flex-shrink-0 mb-4">
       <div className="w-full h-48 rounded-xl bg-gray-700"></div>
     </div>
@@ -43,7 +47,7 @@ const EventList = ({ events }) => (
           <motion.div
             key={event.id}
             variants={cardVariants}
-            className="flex flex-col bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 md:p-6 w-full md:w-[20%] shadow-lg hover:shadow-xl hover:border-purple-500/30 transition-all duration-300 hover:-rotate-1"
+            className="flex flex-col bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-4 md:p-6 w-full sm:w-[45%] md:w-[30%] lg:w-[22%] shadow-lg hover:shadow-xl hover:border-purple-500/30 transition-all duration-300 hover:-rotate-1"
           >
             <div className="flex-shrink-0 mb-4">
               <img
@@ -63,14 +67,25 @@ const EventList = ({ events }) => (
                 <strong className="text-white">Venue:</strong> {event.Venue}
               </p>
               <p className="text-gray-300 mb-2 text-sm">
-                <strong className="text-white">Time:</strong> {new Date(event.Time).toLocaleString()}
+                <strong className="text-white">Date:</strong>{' '}
+                {new Date(event.Time.seconds * 1000).toLocaleString().split(',')[0]}
               </p>
               <p className="text-gray-300 mb-2 text-sm">
                 <strong className="text-white">Status:</strong> {event.Status}
               </p>
-              <p className="text-gray-300 text-sm">
-                <strong className="text-white">Registration:</strong> {event.Registration}
-              </p>
+              {event.Registration && event.Registration !== 'OVER' ? (
+                <p className="text-gray-300 text-sm">
+                  <strong className="text-white">Registration:</strong>{' '}
+                  <a
+                    href={event.Registration}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-purple-400 underline hover:text-pink-400 transition"
+                  >
+                    Register here
+                  </a>
+                </p>
+              ) : null}
             </div>
           </motion.div>
         ))}
@@ -89,114 +104,160 @@ const EventList = ({ events }) => (
 );
 
 function Event() {
-  const [events, setEvents] = useState([]);
+  // ---------- State for Upcoming & Live ----------
   const [loading, setLoading] = useState(true);
-  const [pageLoading, setPageLoading] = useState(false); // For pagination loading
   const [error, setError] = useState(null);
-  const [lastDoc, setLastDoc] = useState(null);
-  const [hasMore, setHasMore] = useState(true);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [liveEvents, setLiveEvents] = useState([]);
+
+  // ---------- State for Past (paginated) ----------
+  const [pastEvents, setPastEvents] = useState([]); // current page of Completed events
+  const [pageLoading, setPageLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1); // Track total pages
+  const [hasNextPage, setHasNextPage] = useState(true);
+
+  // pageRawCursors[i] = the Firestore document snapshot (lastDoc) from raw fetchPaginatedData
+  // that allowed us to collect (i × LIMIT) Completed events so far.
+  // pageRawCursors[0] = null (start from the very beginning for page 1).
+  const [pageRawCursors, setPageRawCursors] = useState([null]);
+
   const LIMIT = 8;
 
-  // Scroll to top of events section
+  // Helper to scroll up when changing pages
   const scrollToTop = () => {
-    const eventsSection = document.getElementById('events-section');
-    if (eventsSection) {
-      eventsSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    const section = document.getElementById('events-section');
+    if (section) section.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Fetch events for a specific page
-  const fetchPage = async (page) => {
+  // ---------- Fetch exactly one "Completed" page using raw pagination ----------
+  const fetchPastPage = async (page) => {
     setPageLoading(true);
+
     try {
-      let newLastDoc = null;
-      let fetchedEvents = [];
-      let skip = (page - 1) * LIMIT;
+      // 1) The raw cursor from which to begin fetching
+      const startingRawCursor = pageRawCursors[page - 1] || null;
 
-      // Reset events and lastDoc for non-sequential navigation
-      setEvents([]);
-      setLastDoc(null);
+      // 2) Collect enough raw batches to exceed page * LIMIT completed items
+      let collectedCompleted = [];
+      let rawCursor = startingRawCursor;
+      let lastRawSeen = startingRawCursor;
 
-      // Fetch events until we reach the desired page
-      while (fetchedEvents.length < skip + LIMIT && hasMore) {
-        const { data, lastDoc: nextLastDoc, empty } = await fetchPaginatedData('events', LIMIT, newLastDoc);
-        fetchedEvents = [...fetchedEvents, ...data];
-        newLastDoc = nextLastDoc;
-        setHasMore(!empty && data.length === LIMIT);
-        if (empty || data.length < LIMIT) break;
+      while (collectedCompleted.length < page * LIMIT) {
+        const { data: rawBatch, lastDoc: newRawCursor, empty } =
+          await fetchPaginatedData('events', LIMIT, rawCursor);
+
+        const newCompleted = rawBatch.filter((e) => e.Status === 'Completed');
+        collectedCompleted = [...collectedCompleted, ...newCompleted];
+
+        lastRawSeen = newRawCursor;
+        rawCursor = newRawCursor;
+        if (empty) break; // no more raw docs
       }
 
-      // Slice the events for the current page
-      const pageEvents = fetchedEvents.slice(skip, skip + LIMIT);
-      setEvents(pageEvents);
-      setLastDoc(newLastDoc);
+      // 3) Now slice out exactly the desired page:
+      const startIndex = (page - 1) * LIMIT;
+      const pageSlice = collectedCompleted.slice(startIndex, startIndex + LIMIT);
+      setPastEvents(pageSlice);
+
+      // 4) Determine the next raw cursor (the document snapshot right after collecting page * LIMIT completed)
+      //    We must re-run a smaller loop to find exactly where page * LIMIT ended.
+      let count = 0;
+      let cursorForNext = startingRawCursor;
+      while (count < page * LIMIT) {
+        const { data: rawBatch, lastDoc: nextRaw } =
+          await fetchPaginatedData('Announcements', LIMIT, cursorForNext);
+        const completedInBatch = rawBatch.filter((e) => e.Status === 'Completed');
+        count += completedInBatch.length;
+        cursorForNext = nextRaw;
+        if (!nextRaw) break;
+      }
+
+      // 5) Save that raw cursor into our array so page+1 can start there
+      setPageRawCursors((prev) => {
+        const copy = [...prev];
+        copy[page] = cursorForNext || null;
+        return copy;
+      });
+
+      // 6) Determine if there's truly a next page:
+      //    If total collectedCompleted length > page * LIMIT, there's at least one more completed left.
+      setHasNextPage(collectedCompleted.length > page * LIMIT);
+
       setCurrentPage(page);
-      // Estimate total pages
-      setTotalPages(Math.max(totalPages, Math.ceil(fetchedEvents.length / LIMIT)));
       scrollToTop();
+      setError(null);
     } catch (err) {
-      console.error('Error fetching events:', err);
-      setError('Failed to fetch events. Please try again later.');
+      console.error('Error fetching past events page:', err);
+      setError('Failed to load past events. Please try again later.');
     } finally {
       setPageLoading(false);
       setLoading(false);
     }
   };
 
-  // Handle initial load
+  // ---------- Initial Load (Upcoming + Live + Past page 1) ----------
   useEffect(() => {
     const loadInitial = async () => {
       try {
-        const { data, lastDoc: newLastDoc, empty } = await fetchPaginatedData('events', LIMIT, null);
-        setEvents(data);
-        setLastDoc(newLastDoc);
-        setHasMore(!empty && data.length === LIMIT);
-        setTotalPages(Math.max(totalPages, 1));
+        setLoading(true);
+
+        // 1) Fetch all announcements once for Upcoming & Live
+        const allAnnouncements = await fetchDataFromCollection('Announcements');
+        setUpcomingEvents(allAnnouncements.filter((e) => e.Status === 'upcoming'));
+        setLiveEvents(allAnnouncements.filter((e) => e.Status === 'live'));
+
+        // 2) Fetch Past (Completed) → page 1
+        await fetchPastPage(1);
       } catch (err) {
-        setError('Failed to fetch events. Please try again later.');
         console.error(err);
-      } finally {
+        setError('Failed to fetch events. Please try again later.');
         setLoading(false);
       }
     };
     loadInitial();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle page navigation
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages && page !== currentPage) {
-      fetchPage(page);
-    }
-  };
-
-  // Handle First, Prev, Next, Last
-  const handleFirst = () => handlePageChange(1);
-  const handlePrev = () => handlePageChange(currentPage - 1);
+  // ---------- Pagination Handlers ----------
   const handleNext = () => {
-    if (hasMore) {
-      fetchPage(currentPage + 1);
-    }
+    if (!hasNextPage) return;
+    fetchPastPage(currentPage + 1);
   };
-  const handleLast = () => handlePageChange(totalPages);
 
-  // Pagination buttons
+  const handlePrev = () => {
+    if (currentPage === 1) return;
+    fetchPastPage(currentPage - 1);
+  };
+
+  const handleFirst = () => {
+    if (currentPage === 1) return;
+    fetchPastPage(1);
+  };
+
+  const handleLast = () => {
+    if (!hasNextPage) return;
+    fetchPastPage(currentPage + 1);
+  };
+
+  // Render pagination buttons (up to 3 numbers centered on currentPage)
   const renderPagination = () => {
     const pageButtons = [];
-    const maxPagesToShow = 3; // Show up to 3 page numbers
+    const maxPagesToShow = 3;
     let startPage = Math.max(1, currentPage - 1);
-    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
-    if (endPage - startPage < maxPagesToShow - 1) {
-      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    let endPage = startPage + maxPagesToShow - 1;
+    if (!hasNextPage && endPage > currentPage) {
+      endPage = currentPage;
     }
 
     for (let i = startPage; i <= endPage; i++) {
       pageButtons.push(
         <button
           key={i}
-          onClick={() => handlePageChange(i)}
+          onClick={() => {
+            if (i === currentPage) return;
+            if (i < currentPage) return handlePrev();
+            if (i > currentPage) return handleNext();
+          }}
           disabled={pageLoading}
           className={`px-4 py-2 rounded-full text-sm font-medium transition duration-300 ${
             currentPage === i
@@ -238,9 +299,9 @@ function Event() {
         {pageButtons}
         <button
           onClick={handleNext}
-          disabled={!hasMore || pageLoading}
+          disabled={!hasNextPage || pageLoading}
           className={`px-4 py-2 rounded-full text-sm font-medium transition duration-300 ${
-            !hasMore || pageLoading
+            !hasNextPage || pageLoading
               ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
               : 'bg-white/5 text-gray-300 hover:bg-white/10'
           }`}
@@ -249,9 +310,9 @@ function Event() {
         </button>
         <button
           onClick={handleLast}
-          disabled={currentPage === totalPages || !hasMore || pageLoading}
+          disabled={!hasNextPage || pageLoading}
           className={`px-4 py-2 rounded-full text-sm font-medium transition duration-300 ${
-            currentPage === totalPages || !hasMore || pageLoading
+            !hasNextPage || pageLoading
               ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
               : 'bg-white/5 text-gray-300 hover:bg-white/10'
           }`}
@@ -262,46 +323,43 @@ function Event() {
     );
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-950">
-      <motion.p className="text-white text-xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-        Loading events...
-      </motion.p>
-    </div>
-  );
-  if (error) return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-950">
-      <motion.p
-        className="text-center text-red-500 text-lg"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        {error}
-      </motion.p>
-    </div>
-  );
+  // ---------- Loading & Error States ----------
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-950">
+        <motion.p
+          className="text-white text-xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          Loading events...
+        </motion.p>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-950">
+        <motion.p
+          className="text-center text-red-500 text-lg"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          {error}
+        </motion.p>
+      </div>
+    );
+  }
 
-  // Group events by status
-  const grouped = {
-    upcoming: events.filter(e => e.Status === 'Upcoming'),
-    live: events.filter(e => e.Status === 'In progress'),
-    past: events.filter(e => e.Status === 'Completed'),
-  };
-
-  // Define sections
-  const sections = [
-    { key: 'upcoming', label: 'Upcoming Events', events: grouped.upcoming },
-    { key: 'live', label: 'Live Events', events: grouped.live },
-    { key: 'past', label: 'Past Events', events: grouped.past },
-  ];
-
+  // ---------- Final JSX: Upcoming, Live, and Past Sections ----------
   return (
     <div
       id="events-section"
       className="relative min-h-screen text-white font-sans py-16 px-6 md:px-16 lg:px-24 overflow-hidden"
     >
-      {/* Animated Background with Gradient and Parallax */}
+      {/* Animated Background */}
       <motion.div
         className="absolute inset-0 z-0"
         style={{ background: 'radial-gradient(circle at 50% 50%, #2a1a5e 0%, #0a0a0a 70%)' }}
@@ -346,31 +404,52 @@ function Event() {
         </motion.p>
       </header>
 
-      {/* Event Sections */}
-      <div className="relative z-10">
-        {sections.map(section => (
-          <motion.section
-            key={section.key}
-            variants={sectionVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            className="mb-20"
-          >
-            <h2 className="text-4xl font-bold mb-10 text-center">{section.label}</h2>
-            {pageLoading && section.key === 'past' ? (
-              <div className="flex flex-wrap justify-center gap-6 px-4">
-                {Array.from({ length: LIMIT }).map((_, i) => (
-                  <EventSkeleton key={i} />
-                ))}
-              </div>
-            ) : (
-              <EventList events={section.events} />
-            )}
-            {section.key === 'past' && renderPagination()}
-          </motion.section>
-        ))}
-      </div>
+      {/* Upcoming Section */}
+      <motion.section
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        className="relative z-10 mb-20"
+      >
+        <h2 className="text-4xl font-bold mb-10 text-center">Upcoming Events</h2>
+        <EventList events={upcomingEvents} />
+      </motion.section>
+
+      {/* Live Section */}
+      <motion.section
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        className="relative z-10 mb-20"
+      >
+        <h2 className="text-4xl font-bold mb-10 text-center">Live Events</h2>
+        <EventList events={liveEvents} />
+      </motion.section>
+
+      {/* Past (Paginated) Section */}
+      <motion.section
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        className="relative z-10 mb-20"
+      >
+        <h2 className="text-4xl font-bold mb-10 text-center">Past Events</h2>
+
+        {pageLoading ? (
+          <div className="flex flex-wrap justify-center gap-6 px-4">
+            {Array.from({ length: LIMIT }).map((_, i) => (
+              <EventSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <EventList events={pastEvents} />
+        )}
+
+        {renderPagination()}
+      </motion.section>
     </div>
   );
 }
