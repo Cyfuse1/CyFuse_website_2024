@@ -14,54 +14,56 @@ export default function AnnouncementSlider({ announcements }) {
   const slideVariants = {
     hiddenRight: { x: "100%", opacity: 0 },
     hiddenLeft: { x: "-100%", opacity: 0 },
-    visible: { x: 0, opacity: 1, transition: { duration: 0.5 } },
-    exit: { opacity: 0, transition: { duration: 0.3 } },
+    visible: { x: 0, opacity: 1, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] } },
+    exit: { opacity: 0, transition: { duration: 0.25 } },
   }
+
   const startAutoplay = useCallback(() => {
     if (autoplayRef.current) clearTimeout(autoplayRef.current)
     autoplayRef.current = setTimeout(() => {
       setDirection(1)
-      setCurrentIndex((prev) => (prev + 1) % announcements.length)
+      setCurrentIndex(prev => (prev + 1) % announcements.length)
     }, 5000)
   }, [announcements.length])
 
   useEffect(() => {
     startAutoplay()
-    return () => {
-      if (autoplayRef.current) clearTimeout(autoplayRef.current)
-    }
+    return () => { if (autoplayRef.current) clearTimeout(autoplayRef.current) }
   }, [currentIndex, announcements.length, startAutoplay])
 
   const handleNext = () => {
     if (autoplayRef.current) clearTimeout(autoplayRef.current)
     setDirection(1)
-    setCurrentIndex((prev) => (prev + 1) % announcements.length)
+    setCurrentIndex(prev => (prev + 1) % announcements.length)
   }
 
   const handlePrev = () => {
     if (autoplayRef.current) clearTimeout(autoplayRef.current)
     setDirection(-1)
-    setCurrentIndex((prev) => (prev - 1 + announcements.length) % announcements.length)
-  }
-
-  const handleMouseEnter = () => {
-    if (autoplayRef.current) clearTimeout(autoplayRef.current)
-  }
-
-  const handleMouseLeave = () => {
-    startAutoplay()
+    setCurrentIndex(prev => (prev - 1 + announcements.length) % announcements.length)
   }
 
   const { Title, Time, Description, Picture } = announcements[currentIndex]
   const date = Time?.seconds
-  ? new Date(Time.seconds * 1000).toISOString().split("T")[0] // → "YYYY-MM-DD"
-  : "Invalid date";
+    ? new Date(Time.seconds * 1000).toISOString().split("T")[0]
+    : "TBA"
+
+  // Progress bar for autoplay
+  const [progressKey, setProgressKey] = useState(0)
+  useEffect(() => {
+    setProgressKey(k => k + 1)
+  }, [currentIndex])
+
   return (
     <div
       ref={sliderRef}
       className="relative overflow-hidden rounded-xl"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      style={{
+        border: '1px solid rgba(6,182,212,0.15)',
+        boxShadow: '0 0 30px rgba(6,182,212,0.06)',
+      }}
+      onMouseEnter={() => { if (autoplayRef.current) clearTimeout(autoplayRef.current) }}
+      onMouseLeave={() => startAutoplay()}
     >
       <div className="aspect-[15/7] md:aspect-[21/9] relative">
         <AnimatePresence initial={false} custom={direction}>
@@ -74,41 +76,82 @@ export default function AnnouncementSlider({ announcements }) {
             exit="exit"
             className="absolute inset-0"
           >
-            <div className="relative h-full w-full overflow-hidden rounded-xl">
+            <div className="relative h-full w-full overflow-hidden">
               <img
                 src={Picture || "/placeholder.svg"}
                 alt={Title}
                 className="w-full h-full object-cover"
+                style={{ filter: 'brightness(0.65) saturate(0.85)' }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-6 md:p-10">
-                <div className="flex items-center text-gray-300 mb-3">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <span className="text-sm">{date}</span>
+              {/* Scanline overlay */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px)',
+                }}
+              />
+              {/* Gradient */}
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgb(3,7,18) 5%, rgba(3,7,18,0.6) 50%, rgba(3,7,18,0.2) 100%)' }} />
+
+              {/* Content */}
+              <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <Calendar className="h-3.5 w-3.5" style={{ color: '#06b6d4' }} />
+                  <span
+                    className="text-xs"
+                    style={{ fontFamily: "'JetBrains Mono', monospace", color: '#06b6d4' }}
+                  >
+                    {date}
+                  </span>
                 </div>
-                <h3 className="text-2xl md:text-3xl font-bold mb-2">{Title}</h3>
-                <p className="text-gray-300 mb-4 max-w-2xl">{Description}</p>
+                <h3
+                  className="text-2xl md:text-3xl font-bold mb-2"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#fff' }}
+                >
+                  {Title}
+                </h3>
+                <p
+                  className="max-w-2xl text-sm md:text-base"
+                  style={{ color: '#94a3b8', fontFamily: "'Inter', sans-serif", lineHeight: '1.6' }}
+                >
+                  {Description}
+                </p>
               </div>
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      <button
-        onClick={handlePrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors z-10"
-        aria-label="Previous announcement"
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </button>
-      <button
-        onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors z-10"
-        aria-label="Next announcement"
-      >
-        <ChevronRight className="h-6 w-6" />
-      </button>
+      {/* Nav buttons */}
+      {[
+        { pos: 'left-4', onClick: handlePrev, Icon: ChevronLeft, label: 'Previous' },
+        { pos: 'right-4', onClick: handleNext, Icon: ChevronRight, label: 'Next' },
+      ].map(({ pos, onClick, Icon, label }) => (
+        <button
+          key={label}
+          onClick={onClick}
+          className={`absolute ${pos} top-1/2 -translate-y-1/2 w-9 h-9 rounded flex items-center justify-center text-white z-10 transition-all duration-200`}
+          style={{
+            background: 'rgba(13,17,23,0.8)',
+            border: '1px solid rgba(6,182,212,0.2)',
+            backdropFilter: 'blur(8px)',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.borderColor = 'rgba(6,182,212,0.5)';
+            e.currentTarget.style.boxShadow = '0 0 12px rgba(6,182,212,0.3)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.borderColor = 'rgba(6,182,212,0.2)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+          aria-label={`${label} announcement`}
+        >
+          <Icon className="h-5 w-5" style={{ color: '#06b6d4' }} />
+        </button>
+      ))}
 
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+      {/* Slide progress indicators */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 z-10">
         {announcements.map((_, idx) => (
           <button
             key={idx}
@@ -116,11 +159,24 @@ export default function AnnouncementSlider({ announcements }) {
               setDirection(idx > currentIndex ? 1 : -1)
               setCurrentIndex(idx)
             }}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              currentIndex === idx ? "bg-white w-6" : "bg-white/50 hover:bg-white/80"
-            }`}
+            className="relative h-1 rounded-full transition-all duration-300 overflow-hidden"
+            style={{
+              width: currentIndex === idx ? '28px' : '8px',
+              background: 'rgba(255,255,255,0.15)',
+            }}
             aria-label={`Go to announcement ${idx + 1}`}
-          />
+          >
+            {currentIndex === idx && (
+              <motion.div
+                key={progressKey}
+                className="absolute inset-y-0 left-0 rounded-full"
+                style={{ background: 'linear-gradient(to right, #06b6d4, #3b82f6)' }}
+                initial={{ width: '0%' }}
+                animate={{ width: '100%' }}
+                transition={{ duration: 5, ease: 'linear' }}
+              />
+            )}
+          </button>
         ))}
       </div>
     </div>

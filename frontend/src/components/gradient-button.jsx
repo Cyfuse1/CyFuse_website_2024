@@ -10,42 +10,78 @@ GradientButton.propTypes = {
 };
 
 export default function GradientButton({ children, onClick, icon, href }) {
-  const buttonClasses = `
-    relative px-8 py-3 rounded-full font-medium text-white
-    overflow-hidden group
-    before:absolute before:inset-0
-    before:bg-gradient-to-r before:from-indigo-600 before:via-indigo-500 before:to-purple-600
-    hover:before:bg-gradient-to-r hover:before:from-indigo-500 hover:before:via-purple-600 hover:before:to-indigo-600
-    before:transition-all before:duration-500
-    after:absolute after:inset-0 after:bg-gradient-to-r after:from-indigo-600 after:via-indigo-500 after:to-purple-600
-    after:opacity-0 hover:after:opacity-100
-    after:transition-opacity after:duration-500
-    shadow-[0_0_15px_rgba(99,102,241,0.5)]
-    hover:shadow-[0_0_25px_rgba(99,102,241,0.7)]
-    transition-all duration-300
-  `;
+  const buttonStyle = {
+    position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '10px 24px',
+    borderRadius: '6px',
+    fontWeight: '600',
+    fontSize: '0.9rem',
+    color: '#fff',
+    fontFamily: "'Space Grotesk', sans-serif",
+    background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+    border: '1px solid rgba(6,182,212,0.4)',
+    boxShadow: '0 0 18px rgba(6,182,212,0.35)',
+    transition: 'all 0.25s ease',
+    cursor: 'pointer',
+    textDecoration: 'none',
+    letterSpacing: '0.02em',
+    overflow: 'hidden',
+  };
 
-  const contentClasses = `
-    relative z-10 flex items-center justify-center
-  `;
+  const handleMouseEnter = (e) => {
+    e.currentTarget.style.boxShadow = '0 0 32px rgba(6,182,212,0.6), 0 0 80px rgba(6,182,212,0.15)';
+    e.currentTarget.style.background = 'linear-gradient(135deg, #22d3ee 0%, #60a5fa 100%)';
+    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.7)';
+    e.currentTarget.style.transform = 'translateY(-1px)';
+  };
 
-    if (href) {
-    return (
-      <Link to={href} className={buttonClasses}>
-        <span className={contentClasses}>
-          {children}
-          {icon}
-        </span>
-      </Link>
-    )
-  }
+  const handleMouseLeave = (e) => {
+    e.currentTarget.style.boxShadow = '0 0 18px rgba(6,182,212,0.35)';
+    e.currentTarget.style.background = 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)';
+    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.4)';
+    e.currentTarget.style.transform = 'translateY(0)';
+  };
 
-  return (
-    <button onClick={onClick} className={buttonClasses}>
-      <span className={contentClasses}>
+  const handleMouseDown = (e) => {
+    e.currentTarget.style.transform = 'translateY(1px)';
+    e.currentTarget.style.boxShadow = '0 0 12px rgba(6,182,212,0.4)';
+  };
+
+  const handleMouseUp = (e) => {
+    e.currentTarget.style.transform = 'translateY(-1px)';
+    e.currentTarget.style.boxShadow = '0 0 32px rgba(6,182,212,0.6)';
+  };
+
+  const content = (
+    <>
+      <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center' }}>
         {children}
         {icon}
       </span>
+    </>
+  );
+
+  const eventHandlers = {
+    onMouseEnter: handleMouseEnter,
+    onMouseLeave: handleMouseLeave,
+    onMouseDown: handleMouseDown,
+    onMouseUp: handleMouseUp,
+  };
+
+  if (href) {
+    return (
+      <Link to={href} style={buttonStyle} {...eventHandlers}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button onClick={onClick} style={buttonStyle} {...eventHandlers}>
+      {content}
     </button>
   );
 }

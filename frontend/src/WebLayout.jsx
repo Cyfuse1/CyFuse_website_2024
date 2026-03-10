@@ -1,14 +1,17 @@
 import { Outlet } from 'react-router-dom'
 import Footer from './components/Footer'
 import Header from './components/Header'
-function GuestLayout() {
+import ScrollToTopButton from './components/ScrollToTopButton'
+
+function WebLayout() {
   return (
     <>
-    <Header />
-    <Outlet />
-    <Footer />
+      <Header />
+      <Outlet />
+      <Footer />
+      <ScrollToTopButton />
     </>
   )
 }
 
-export default GuestLayout;
+export default WebLayout;

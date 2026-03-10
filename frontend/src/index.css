@@ -1,45 +1,293 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   GOOGLE FONTS
+   ============================================================ */
 
-/* Chrome, Edge, Safari */
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  --cy-bg: #030712;
+  --cy-surface: #0d1117;
+  --cy-surface-2: #111827;
+  --cy-border: rgba(6, 182, 212, 0.15);
+  --cy-border-hover: rgba(6, 182, 212, 0.45);
+  --accent: #308a99;
+  --accent-glow: rgba(48, 138, 153, 0.4);
+  --accent-low: rgba(48, 138, 153, 0.1);
+  --glow: 0 0 20px rgba(48, 138, 153, 0.35);
+  --cy-text: #e2e8f0;
+  --cy-muted: #64748b;
+  --cy-grid-color: rgba(6, 182, 212, 0.06);
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--cy-bg);
+  color: var(--cy-text);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ============================================================
+   TECH BACKGROUND GRID
+   ============================================================ */
+.tech-grid {
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--cy-grid-color) 1px, transparent 0),
+    linear-gradient(to right, rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px, 64px 64px, 64px 64px;
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+.glow-text {
+  text-shadow: 0 0 20px var(--cy-glow), 0 0 40px rgba(6, 182, 212, 0.15);
+}
+
+.glow-border {
+  border-color: var(--cy-border);
+  box-shadow: 0 0 15px var(--cy-glow), inset 0 0 15px rgba(6, 182, 212, 0.03);
+}
+
+.glow-border:hover {
+  border-color: var(--cy-border-hover);
+  box-shadow: 0 0 25px var(--cy-glow-strong), inset 0 0 20px rgba(6, 182, 212, 0.05);
+}
+
+/* HUD Corner Brackets */
+.hud-corners {
+  position: relative;
+}
+
+.hud-corners::before,
+.hud-corners::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--cy-accent);
+  border-style: solid;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.hud-corners::before {
+  top: -2px;
+  left: -2px;
+  border-width: 2px 0 0 2px;
+}
+
+.hud-corners::after {
+  bottom: -2px;
+  right: -2px;
+  border-width: 0 2px 2px 0;
+}
+
+.hud-corners:hover::before,
+.hud-corners:hover::after {
+  opacity: 1;
+}
+
+/* ============================================================
+   KEYFRAME ANIMATIONS
+   ============================================================ */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px var(--cy-glow);
+  }
+
+  50% {
+    box-shadow: 0 0 25px var(--cy-glow-strong), 0 0 50px rgba(6, 182, 212, 0.15);
+  }
+}
+
+@keyframes border-pulse {
+
+  0%,
+  100% {
+    border-color: rgba(6, 182, 212, 0.15);
+  }
+
+  50% {
+    border-color: rgba(6, 182, 212, 0.45);
+  }
+}
+
+@keyframes flicker {
+
+  0%,
+  95%,
+  100% {
+    opacity: 1;
+  }
+
+  96% {
+    opacity: 0.8;
+  }
+
+  97% {
+    opacity: 1;
+  }
+
+  98% {
+    opacity: 0.6;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-border-pulse {
+  animation: border-pulse 3s ease-in-out infinite;
+}
+
+.animate-flicker {
+  animation: flicker 8s ease-in-out infinite;
+}
+
+/* ============================================================
+   SCAN LINE EFFECT (used over hero video)
+   ============================================================ */
+.scanline-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  overflow: hidden;
+}
+
+.scanline-overlay::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(6, 182, 212, 0.3), transparent);
+  animation: scanline 6s linear infinite;
+}
+
+.scanline-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0, 0, 0, 0.08) 3px,
+      rgba(0, 0, 0, 0.08) 4px);
+}
+
+/* ============================================================
+   TECH CARD — base style
+   ============================================================ */
+.tech-card {
+  background: var(--cy-surface);
+  border: 1px solid var(--cy-border);
+  border-radius: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tech-card:hover {
+  border-color: var(--cy-border-hover);
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.15);
+}
+
+/* ============================================================
+   MONOSPACE BADGE
+   ============================================================ */
+.mono-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(6, 182, 212, 0.08);
+  color: var(--cy-accent);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+}
+
+/* ============================================================
+   SCROLLBAR — Cyber Cyan
+   ============================================================ */
 ::-webkit-scrollbar {
-    width: 10px;
-    background: blackt; /* Fully transparent scrollbar track */
+  width: 8px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-track {
-    background: transparent; /* Transparent track for consistency */
-    border-radius: 8px; /* Smooth rounded edges */
+  background: #0d1117;
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-button {
-    display: none; /* Hide scrollbar arrows for a cleaner look */
+  display: none;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #d16ba5 0%, #86a8e7 50%, #5ffbf1 100%);
-    border-radius: 8px;
-    border: 2px solid transparent; /* Border for padding effect */
-    background-clip: padding-box; /* Ensures gradient doesn't bleed into border */
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-    transition: background 0.3s ease; /* Smooth hover transition */
+  background: linear-gradient(180deg, #06b6d4 0%, #3b82f6 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+  transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+  background: linear-gradient(180deg, #22d3ee 0%, #60a5fa 100%);
+  box-shadow: 0 0 14px rgba(6, 182, 212, 0.7);
 }
 
 /* Firefox */
 * {
-    scrollbar-width: thin; /* Slim scrollbar */
-    scrollbar-color: #d16ba5 black; /* Thumb uses primary gradient color, transparent track */
+  scrollbar-width: thin;
+  scrollbar-color: #06b6d4 #0d1117;
 }
 
-/* Optional: Ensure body or container has no conflicting backgrounds */
 body {
-    scrollbar-width: thin; /* Reinforce for Firefox */
-    scrollbar-color: #d16ba5 black;
+  scrollbar-width: thin;
+  scrollbar-color: #06b6d4 #0d1117;
 }

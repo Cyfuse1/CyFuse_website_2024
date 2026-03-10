@@ -1,213 +1,217 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { Link } from 'react-router-dom';
+import { Cpu, Rocket, Users, BookOpen, ChevronRight } from 'lucide-react';
+import GradientButton from './gradient-button';
 
-// Framer Motion variants
-const sectionVariants = {
+const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.2 },
+    transition: { staggerChildren: 0.15, delayChildren: 0.2 },
   },
 };
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: 'easeOut' } },
+const itemVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.98 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: 'easeOut' } },
 };
 
+const PurpleInfinityBackground = () => (
+  <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    {/* Infinite Moving Gradient */}
+    <motion.div
+      className="absolute inset-[-50%] opacity-30"
+      animate={{
+        rotate: [0, 90, 180, 270, 360],
+        scale: [1, 1.2, 1, 1.1, 1],
+      }}
+      transition={{
+        duration: 30,
+        repeat: Infinity,
+        ease: "linear",
+      }}
+      style={{
+        background: 'radial-gradient(circle at 40% 40%, #581c87 0%, transparent 40%), radial-gradient(circle at 60% 60%, #7e22ce 0%, transparent 40%)',
+        filter: 'blur(80px)',
+      }}
+    />
+
+    {/* Grid Base */}
+    <div
+      className="absolute inset-0"
+      style={{
+        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(168,85,247,0.1) 1.5px, transparent 0)`,
+        backgroundSize: '40px 40px',
+      }}
+    />
+
+    {/* Drifting Orbs */}
+    {[...Array(6)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute rounded-full blur-[100px]"
+        style={{
+          width: 300 + i * 50,
+          height: 300 + i * 50,
+          background: i % 2 === 0 ? 'rgba(168,85,247,0.08)' : 'rgba(59,130,246,0.05)',
+          top: `${Math.random() * 100}%`,
+          left: `${Math.random() * 100}%`,
+        }}
+        animate={{
+          x: [0, 50, -50, 0],
+          y: [0, -50, 50, 0],
+          scale: [1, 1.1, 0.9, 1],
+        }}
+        transition={{
+          duration: 15 + i * 2,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+      />
+    ))}
+    {/* Vignette Overlay */}
+    <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 50%, transparent 0%, rgba(3,7,18,0.7) 100%)' }} />
+  </div>
+);
+
 function About() {
-  const [heroRef, heroInView] = useInView({ triggerOnce: false, threshold: 0.1 });
-  const [missionRef, missionInView] = useInView({ triggerOnce: false, threshold: 0.2 });
-  const [visionRef, visionInView] = useInView({ triggerOnce: false, threshold: 0.2 });
-  const [activitiesRef, activitiesInView] = useInView({ triggerOnce: false, threshold: 0.2 });
-  const [ctaRef, ctaInView] = useInView({ triggerOnce: false, threshold: 0.2 });
+  const { ref, inView } = useInView({ threshold: 0.1, triggerOnce: true });
+
+  const activities = [
+    { icon: <Cpu className="w-6 h-6" />, title: 'Workshops', desc: 'Dive into hands-on sessions covering the latest tech stacks.' },
+    { icon: <Rocket className="w-6 h-6" />, title: 'Hackathons', desc: 'Build and innovate under pressure to solve real-world problems.' },
+    { icon: <Users className="w-6 h-6" />, title: 'Networking', desc: 'Connect with mentors and like-minded tech enthusiasts.' },
+    { icon: <BookOpen className="w-6 h-6" />, title: 'Open Source', desc: 'Contribute to meaningful projects and learn collaboration.' },
+  ];
+
+  const purpleAccent = '#a855f7';
 
   return (
-    <div className="relative text-white font-sans overflow-hidden min-h-screen">
-      {/* Animated Background with Gradient and Particles */}
-      <motion.div
-        className="absolute inset-0 z-0"
-        style={{ background: 'radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0a0a0a 70%)' }}
-        animate={{
-          background: [
-            'radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0a0a0a 70%)',
-            'radial-gradient(circle at 70% 30%, #2a1a5e 0%, #0a0a0a 70%)',
-            'radial-gradient(circle at 30% 60%, #1e1b4b 0%, #0a0a0a 70%)',
-            'radial-gradient(circle at 70% 70%, #2a1a5e 0%, #0a0a0a 70%)',
-            'radial-gradient(circle at 30% 30%, #1e1b4b 0%, #0a0a0a 70%)',
-          ],
-        }}
-        transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
-      >
-        <motion.div
-          className="absolute inset-0 z-[1]"
-          style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, rgba(139, 92, 246, 0.4) 1px, transparent 0)`,
-            backgroundSize: '30px 30px',
-            filter: 'blur(1px)',
-          }}
-          animate={{ opacity: [0.6, 0.9, 0.6], scale: [1, 1.05, 1], x: [-15, 15, -15] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </motion.div>
+    <div className="relative min-h-screen text-white py-16 px-6 md:px-16 lg:px-24 overflow-hidden" style={{ background: '#030712' }}>
+      <PurpleInfinityBackground />
 
       {/* Hero Section */}
-        <motion.section
-          ref={heroRef}
-          variants={sectionVariants}
-          initial="hidden"
-          animate={heroInView ? 'visible' : 'hidden'}
-          className="flex flex-col justify-center items-center w-full relative z-[5] px-4 py-20"
+      <header className="relative z-10 text-center my-24">
+        <span
+          className="mono-badge mb-6 inline-block"
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            color: purpleAccent,
+            borderColor: 'rgba(168,85,247,0.3)',
+            background: 'rgba(168,85,247,0.05)'
+          }}
         >
-          <motion.div variants={cardVariants} className="text-center max-w-4xl mt-10">
-            <h1
-          className="text-5xl md:text-7xl font-bold mb-6 mt-16 bg-gradient-to-r from-white to-indigo-300 text-transparent bg-clip-text"
+          // INTEL_OVERVIEW
+        </span>
+        <motion.h1
+          className="text-5xl md:text-8xl font-black mb-6"
+          style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            textShadow: `0 0 50px rgba(168,85,247,0.3)`,
+          }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          About <span style={{ color: purpleAccent }}>Us</span>
+        </motion.h1>
+        <motion.p
+          className="max-w-2xl mx-auto text-base md:text-xl text-slate-400"
+          style={{ fontFamily: "'Inter', sans-serif", lineHeight: '1.6' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+        >
+          We are <span style={{ color: '#fff' }}>CyFuse</span> — where interdisciplinary magic happens.
+          We bridge the gap between imagination and execution.
+        </motion.p>
+      </header>
+
+      {/* Mission & Vision */}
+      <motion.section
+        ref={ref}
+        variants={containerVariants}
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
+        className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto mb-32"
+      >
+        {[
+          { title: 'MISSION', content: 'Our mission is to foster a community representing different backgrounds and academic programs to collaborate on diverse technological projects.' },
+          { title: 'VISION', content: 'We aim to become a nexus of innovation where students from all disciplines come together to build products that solve real problems.' },
+        ].map((item, i) => (
+          <motion.div
+            key={item.title}
+            variants={itemVariants}
+            className="hud-corners p-8 md:p-12 relative overflow-hidden group"
+            style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: `1px solid rgba(168,85,247,0.15)`,
+            }}
+            whileHover={{ borderColor: 'rgba(168,85,247,0.4)', background: 'rgba(168,85,247,0.03)' }}
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-10 font-mono text-6xl select-none group-hover:opacity-20 transition-opacity">
+              0{i + 1}
+            </div>
+            <h2
+              className="text-sm font-bold mb-6 tracking-widest text-slate-500"
+              style={{ fontFamily: "'JetBrains Mono', monospace" }}
             >
-          About CyFuse
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8">
-          Welcome to CyFuse! We are the official technology club of IIIT Delhi, dedicated to driving innovation and technical excellence through collaboration and creativity.
-            </p>
-            <p className="text-lg md:text-xl text-gray-300 mb-4">
-          CyFuse is a student-led initiative that brings together individuals from diverse academic backgrounds to explore emerging technologies and solve real-world problems through hands-on projects and research.
-            </p>
-            <p className="text-lg md:text-xl text-gray-300">
-          As a member of CyFuse, you'll have the opportunity to refine your technical skills, expand your network, and contribute to impactful solutions in a professional yet inclusive environment.
+              [ {item.title} ]
+            </h2>
+            <p className="text-lg md:text-xl leading-relaxed text-slate-300">
+              {item.content}
             </p>
           </motion.div>
-        </motion.section>
-
-        {/* Mission Section */}
-      <motion.section
-        ref={missionRef}
-        variants={sectionVariants}
-        initial="hidden"
-        animate={missionInView ? 'visible' : 'hidden'}
-        className="flex flex-col justify-center items-center w-full py-20 relative px-4 z-[5]"
-      >
-        <motion.h2
-          variants={cardVariants}
-          className="text-3xl md:text-4xl font-semibold text-white mb-8"
-        >
-          Our Mission
-        </motion.h2>
-        <motion.div
-          variants={cardVariants}
-          className="max-w-3xl bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 text-center shadow-lg hover:shadow-xl transition-all duration-300"
-        >
-          <p className="text-lg md:text-xl text-gray-300">
-            To foster a culture of innovation and continuous learning by integrating technology and creativity, enabling students to develop practical skills and contribute to impactful solutions.
-          </p>
-        </motion.div>
+        ))}
       </motion.section>
 
-      {/* Vision Section */}
-      <motion.section
-        ref={visionRef}
-        variants={sectionVariants}
-        initial="hidden"
-        animate={visionInView ? 'visible' : 'hidden'}
-        className="flex flex-col justify-center items-center w-full py-20 relative px-4 z-[5]"
-      >
-        <motion.h2
-          variants={cardVariants}
-          className="text-3xl md:text-4xl font-semibold text-white mb-8"
-        >
-          Our Vision
-        </motion.h2>
-        <motion.div
-          variants={cardVariants}
-          className="max-w-3xl bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 text-center shadow-lg hover:shadow-xl transition-all duration-300"
-        >
-          <p className="text-lg md:text-xl text-gray-300">
-            We envision a future where technology and innovation are accessible to all. CyFuse strives to be a leading tech community that inspires, educates, and fosters the next generation of tech leaders and creators.
-          </p>
-        </motion.div>
-      </motion.section>
+      {/* Activities Grid */}
+      <section className="relative z-10 max-w-6xl mx-auto mb-32">
+        <header className="mb-16">
+          <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>What We Do</h2>
+          <div className="h-1 w-20 rounded-full" style={{ background: `linear-gradient(to right, ${purpleAccent}, transparent)` }} />
+        </header>
 
-      {/* Activities Section */}
-      <motion.section
-        ref={activitiesRef}
-        variants={sectionVariants}
-        initial="hidden"
-        animate={activitiesInView ? 'visible' : 'hidden'}
-        className="flex flex-col justify-center items-center w-full py-20 relative px-4 z-[5]"
-      >
-        <motion.h2
-          variants={cardVariants}
-          className="text-3xl md:text-4xl font-semibold text-white mb-12"
-        >
-          Our Activities
-        </motion.h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl">
-          {[
-            {
-              title: 'Technical Projects',
-              description: 'Development of advanced projects in AI, cybersecurity, blockchain, and more.',
-            },
-            {
-              title: 'Workshops',
-              description: 'Hands-on sessions to equip students with in-demand technical skills.',
-            },
-            {
-              title: 'Hackathons',
-              description: 'Participation in and hosting of coding contests and innovation challenges.',
-            },
-            {
-              title: 'Peer Learning',
-              description: 'Mutual learning and growth through mentorship and collaboration.',
-            },
-            {
-              title: 'Social Impact',
-              description: 'Developing solutions that contribute to societal welfare.',
-            },
-          ].map((activity, index) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {activities.map((activity, i) => (
             <motion.div
-              key={index}
-              variants={cardVariants}
-              className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300"
+              key={i}
+              className="hud-corners p-6 transition-all duration-300"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+              whileHover={{
+                y: -5,
+                borderColor: 'rgba(168,85,247,0.3)',
+                boxShadow: `0 10px 30px -10px rgba(168,85,247,0.2)`
+              }}
             >
-              <h3 className="text-xl font-bold text-white mb-2">{activity.title}</h3>
-              <p className="text-gray-300">{activity.description}</p>
+              <div className="mb-4 text-purple-400">{activity.icon}</div>
+              <h3 className="text-lg font-bold mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{activity.title}</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">{activity.desc}</p>
             </motion.div>
           ))}
         </div>
-      </motion.section>
+      </section>
 
-      {/* Call to Action Section */}
+      {/* CTA */}
       <motion.section
-        ref={ctaRef}
-        variants={sectionVariants}
-        initial="hidden"
-        animate={ctaInView ? 'visible' : 'hidden'}
-        className="flex flex-col justify-center items-center w-full py-20 relative px-4 z-[5]"
+        className="relative z-10 text-center py-20 rounded-3xl overflow-hidden"
+        style={{ background: 'linear-gradient(to bottom, rgba(168,85,247,0.05), transparent)' }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
       >
-        <motion.h2
-          variants={cardVariants}
-          className="text-3xl md:text-4xl font-semibold text-white mb-8"
+        <h2 className="text-3xl md:text-5xl font-bold mb-8" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          Ready to <span style={{ color: purpleAccent }}>Build</span>?
+        </h2>
+        <div
+          onClick={() => window.location.hash = '#/team'}
+          className="inline-block"
         >
-          Join the CyFuse Community
-        </motion.h2>
-        <motion.div
-          variants={cardVariants}
-          className="text-center max-w-2xl"
-        >
-          <p className="text-lg md:text-xl text-gray-300 mb-8">
-            Ready to innovate with us? Join our community to collaborate on exciting projects, attend tech events, and meet like-minded creators.
-          </p>
-          <p className="text-md md:text-md text-gray-300 mb-8">
-            As a student-led initiative, CyFuse offers a professional yet inclusive environment where members can refine their technical expertise, expand their network, and gain exposure to real-world applications of their knowledge. The club stands as a testament to IIIT-Delhi’s commitment to academic and technological excellence.
-          </p>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link
-              to="#"
-              className="inline-block px-8 py-4 bg-indigo-600 text-white rounded-full text-lg font-semibold hover:bg-indigo-700 transition-all duration-300"
-            >
-              Join Us
-            </Link>
-          </motion.div>
-        </motion.div>
+          <GradientButton
+            icon={<ChevronRight className="ml-2 w-4 h-4" />}
+          >
+            JOIN_OUR_MISSION
+          </GradientButton>
+        </div>
       </motion.section>
     </div>
   );
